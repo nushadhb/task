@@ -1,0 +1,81 @@
+--call l1_lit.abc_abc();
+ create or replace procedure l1_lit.abc_abc()
+  returns varchar 
+  language sql
+  as
+  $$
+  declare
+  create_task_sql_1 varchar;
+  create_task_sql_2 varchar;
+  DB_NAME VARCHAR;
+  SCH_NAME VARCHAR;
+  SUB_TASK_NAME_1  VARCHAR ;
+  SUB_TASK_NAME_2  VARCHAR ;
+  ROOT_TASK VARCHAR;
+  WARE_HOUSE_NAME VARCHAR:= 'CMPT_WH_CBT_LEGAL_DIA_DEV';
+  TAG_NAME VARCHAR := 'l1_Lit.lit_task_bucket_tg=''lawmanager''';
+  CORE_TABLE VARCHAR;
+  src_sys_cd varchar:='LAWMGR';
+  TASK_CONFIG_OUTPUT RESULTSET;
+  TABLE_STG varchar;
+  TGT_TBL_NM VARCHAR;
+  begin 
+   
+      TASK_CONFIG_OUTPUT:=(select * from (
+                        select 
+                        t.$1:DB_NAME::STRING DB_NAME,
+                        t.$1:SCH_NAME::STRING SCH_NAME,
+                        f.value:ROOT::STRING ROOT_TASK_NAME,
+                        f.value:STG_TBL_NM::string STG_TBL_NM,
+                        f.value:TGT_TBL_NM::string TGT_TBL_NM
+                        from @utility.cbt_legal_dia_local_stage/legal/lhm/LIT_TASK_CONFIG.json  (file_format => UTILITY.FILE_FORMAT_JSON) t,
+                        lateral flatten(input => parse_json(t.$1),path => 'TASK_CONFIG') f,lateral flatten(input => parse_json(f.value)) e));
+ 
+    LET cur CURSOR FOR TASK_CONFIG_OUTPUT;
+
+    FOR row_variable IN cur DO
+        --staging table reading true
+	    DB_NAME := row_variable.DB_NAME;
+	    SCH_NAME := row_variable.SCH_NAME;
+	    TABLE_STG := row_variable.STG_TBL_NM;
+        ROOT_TASK  := row_variable.ROOT_TASK_NAME;
+        TGT_TBL_NM := row_variable.TGT_TBL_NM;
+	
+	    SUB_TASK_NAME_1 := concat(:DB_NAME,'.' ,:SCH_NAME,'.','GEN_BKEY_',:TABLE_STG,'_T1');
+	    SUB_TASK_NAME_2 := concat(:DB_NAME,'.' ,:SCH_NAME,'.','LOAD_',:TGT_TBL_NM,'_T1');
+	    LET LOAD_SP_NAME VARCHAR := concat(:DB_NAME,'.' ,:SCH_NAME,'.','SP_',:TGT_TBL_NM,'LOAD()');
+        create_task_sql_1 := 'CREATE or replace TASK ' || :SUB_TASK_NAME_1 ||  '\n WITH TAG ( ' || :db_name || '.' || :TAG_NAME || ') \n warehouse = ' || :WARE_HOUSE_NAME || '\n After '  ||  :db_name ||'.'|| :ROOT_TASK ||'\n AS \n declare return_val varchar := (system$get_predecessor_return_value());\n proc_return_val varchar; \n LOAD_ETL_ID varchar;\n begin \n LET src_sys_cd varchar := SYSTEM$GET_TASK_GRAPH_CONFIG(''src_sys_cd'')::string; \n select ETL_RUN_ID into :LOAD_ETL_ID FROM l1_lit.LMM_EDW_RUN_ID_CNTL WHERE SCSS_FLG=''N'' AND SRC_SYS_FREQ_CD=''LAWMGR-D'' limit 1; \n--start transaction name ctry_t; \n call ' || :SCH_NAME || '.generate_bkey( ''' || :TABLE_STG  || ''')Into :proc_return_val;\n if (UPPER(:proc_return_val) not LIKE ''ERROR%'') then \n INSERT INTO ' || :DB_NAME || 'lit_task_run_tracking(ETL_RUN_ID,SRC_SYS_FEQ_CD,STG_TB_NAME,CORE_TB_NAME,TASK_NAME,TASK_RUN_DATE,TASK_RUN_STATS,DESC) VALUES(:ETL_RUN_ID ,' || :src_sys_cd ||',' || :TABLE_STG || ',' || :TGT_TBL_NM || ',' || :SUB_TASK_NAME_1 || ',current_timestamp(),''Pass'',''Completed successfully'');' ||'\n call system$set_return_value(''Done''); \n--  commit ; \n else \n --	rollback ;\n INSERT INTO ' || :DB_NAME || '.'  || 'lit_task_run_tracking(ETL_RUN_ID,SRC_SYS_FEQ_CD,STG_TB_NAME,CORE_TB_NAME,TASK_NAME,TASK_RUN_DATE,TASK_RUN_STATS,DESC) VALUES(:ETL_RUN_ID ,' || :src_sys_cd ||',' || :TABLE_STG || ',' || :TGT_TBL_NM || ',' || :SUB_TASK_NAME_1 || ',current_timestamp(),''Failed'',''sub task failed'');\n' || 'call system$set_return_value(''Failed''); \n end if; \n END;' ;
+		create_task_sql_2 := 'CREATE or replace TASK ' || :SUB_TASK_NAME_2 ||  '\n WITH TAG ( ' || :db_name || '.' || :TAG_NAME || ') \n warehouse = ' || :WARE_HOUSE_NAME || '\n After '  ||  :SUB_TASK_NAME_1 ||'\n AS \n declare return_val varchar := (system$get_predecessor_return_value());\n proc_return_val varchar; \n LOAD_ETL_ID varchar;\n begin \n LET src_sys_cd varchar := SYSTEM$GET_TASK_GRAPH_CONFIG(''src_sys_cd'')::string; \n select ETL_RUN_ID into :LOAD_ETL_ID FROM l1_lit.LMM_EDW_RUN_ID_CNTL WHERE SCSS_FLG=''N'' AND SRC_SYS_FREQ_CD=''LAWMGR-D'' limit 1; \n --start transaction name ctry_t; \n call ' || :LOAD_SP_NAME ||' Into :proc_return_val;\n if (UPPER(:proc_return_val) not LIKE ''ERROR%'') then \n INSERT INTO ' || :DB_NAME || 'lit_task_run_tracking(ETL_RUN_ID,SRC_SYS_FEQ_CD,STG_TB_NAME,CORE_TB_NAME,TASK_NAME,TASK_RUN_DATE,TASK_RUN_STATS,DESC) VALUES(:ETL_RUN_ID,' || :src_sys_cd ||',' || :TABLE_STG || ',' || :TGT_TBL_NM || ',' || :SUB_TASK_NAME_2 || ',current_timestamp(),''Pass'',''Completed successfully'');' ||'\n call system$set_return_value(''Done''); \n--  commit ; \n else \n --	rollback ;\n INSERT INTO ' || :DB_NAME || '.'  || 'lit_task_run_tracking(ETL_RUN_ID,SRC_SYS_FEQ_CD,STG_TB_NAME,CORE_TB_NAME,TASK_NAME,TASK_RUN_DATE,TASK_RUN_STATS,DESC) VALUES(:ETL_RUN_ID,' || :src_sys_cd ||',' || :TABLE_STG || ',' || :TGT_TBL_NM || ',' || :SUB_TASK_NAME_2 || ',current_timestamp(),''Failed'',''sub task failed'');\n' || 'call system$set_return_value(''Failed''); \n end if; \n END;' ;
+    END FOR; 
+    RETURN :create_task_sql_1;
+end;
+$$;
+
+select ETL_RUN_ID into :LOAD_ETL_ID FROM l1_lit.LMM_EDW_RUN_ID_CNTL WHERE SCSS_FLG=''N'' AND SRC_SYS_FREQ_CD=''LAWMGR-D'' limit 1;
+----
+
+--OUTPUT SQL : 
+--
+CREATE or replace TASK CBT_LEGAL_DIA_DEV.L1_LIT.GEN_BKEY_SETLM_STG_T1
+ WITH TAG ( CBT_LEGAL_DIA_DEV.l1_Lit.lit_task_bucket_tg='lawmanager') 
+ warehouse = CMPT_WH_CBT_LEGAL_DIA_DEV
+ After CBT_LEGAL_DIA_DEV.lit_LAWMGR_root_t83
+ AS 
+ declare return_val varchar := (system$get_predecessor_return_value());
+ proc_return_val varchar; 
+ LOAD_ETL_ID varchar;
+ begin 
+ LET src_sys_cd varchar := SYSTEM$GET_TASK_GRAPH_CONFIG('src_sys_cd')::string; 
+ select ETL_RUN_ID into :LOAD_ETL_ID FROM l1_lit.LMM_EDW_RUN_ID_CNTL WHERE SCSS_FLG='N' AND SRC_SYS_FREQ_CD='LAWMGR-D' limit 1; 
+--start transaction name ctry_t; 
+ call L1_LIT.generate_bkey( 'SETLM_STG')Into :proc_return_val;
+ if (UPPER(:proc_return_val) not LIKE 'ERROR%') then 
+ INSERT INTO CBT_LEGAL_DIA_DEVlit_task_run_tracking(ETL_RUN_ID,SRC_SYS_FEQ_CD,STG_TB_NAME,CORE_TB_NAME,TASK_NAME,TASK_RUN_DATE,TASK_RUN_STATS,DESC) VALUES(:ETL_RUN_ID ,LAWMGR,SETLM_STG,DOC,CBT_LEGAL_DIA_DEV.L1_LIT.GEN_BKEY_SETLM_STG_T1,current_timestamp(),'Pass','Completed successfully');
+ call system$set_return_value('Done'); 
+--  commit ; 
+ else 
+ --	rollback ;
+ INSERT INTO CBT_LEGAL_DIA_DEV.lit_task_run_tracking(ETL_RUN_ID,SRC_SYS_FEQ_CD,STG_TB_NAME,CORE_TB_NAME,TASK_NAME,TASK_RUN_DATE,TASK_RUN_STATS,DESC) VALUES(:ETL_RUN_ID ,LAWMGR,SETLM_STG,DOC,CBT_LEGAL_DIA_DEV.L1_LIT.GEN_BKEY_SETLM_STG_T1,current_timestamp(),'Failed','sub task failed');
+call system$set_return_value('Failed'); 
+ end if; 
+ END;
