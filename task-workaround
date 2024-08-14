@@ -1,0 +1,127 @@
+  
+  use role "CBT-APP-SNOWFLAKE-LEGAL-DIA-DEV-SYSTEMADMIN";;
+  grant usage on integration  cbt_legal_dia_email_integration_dev to role "CBT-APP-SNOWFLAKE-LEGAL-DIA-DEV-SYSTEMADMIN";
+
+  create or replace table cbt_legal_dia_dev.l1_lit.lit_task_run_tracking(
+   ETL_RUN_ID varchar, 
+   SRC_SYS_FEQ_CD VARCHAR,
+   BUSINES_NAME VARCHAR,
+   STG_TB_NAME VARCHAR,
+   CORE_TB_NAME VARCHAR,
+   SOURCE_CNT NUMBER,
+   STG_CNT NUMBER,
+   TASK_NAME varchar,
+   TASK_RUN_DATE TIMESTAMP_NTZ,
+   TASK_RUN_STATS VARCHAR DEFAULT 'PASS',
+   DESC VARCHAR);
+   
+
+--root task1 
+DROP TASK cbt_legal_dia_dev.l1_Lit.lit_ctry_root_t1;
+  TASK cbt_legal_dia_dev.l1_Lit.lit_ctry_root_t1;
+  CREATE or replace TASK cbt_legal_dia_dev.l1_Lit.lit_ctry_root_t1
+  WITH TAG (cbt_legal_dia_dev.l1_Lit.lit_task_bucket_tg='lawmanager')
+  SCHEDULE = 'USING CRON 0 2 * * * America/New_York'
+  CONFIG=$${"src_sys_cd": "LAWMGR","db_name":"cbt_legal_dia_dev","schema_stg":"l0_lit","schema_core":"l1_lit"}$$
+  warehouse = CMPT_WH_CBT_LEGAL_DIA_DEV
+  ALLOW_OVERLAPPING_EXECUTION = FALSE
+  SUSPEND_TASK_AFTER_NUM_FAILURES = 2
+  AS
+  declare 
+  ETL_RUN_ID varchar;
+  src_sys_cd varchar := SYSTEM$GET_TASK_GRAPH_CONFIG('src_sys_cd')::string;
+  db_name varchar := SYSTEM$GET_TASK_GRAPH_CONFIG('db_name')::string;
+  schema_stg varchar := SYSTEM$GET_TASK_GRAPH_CONFIG('schema_stg')::string;
+  schema_core varchar := SYSTEM$GET_TASK_GRAPH_CONFIG('schema_core')::string;
+  schema_path varchar := concat(:db_name,'.',:schema_core,'.');
+  sql_output resultset;
+  begin 
+  
+   select ETL_RUN_ID::string into :ETL_RUN_ID FROM l1_lit.LMM_EDW_RUN_ID_CNTL WHERE SCSS_FLG='N' AND SRC_SYS_FREQ_CD='LAWMGR-D' limit 1;
+  if (:ETL_RUN_ID is null  ) then 
+           -- return 'Error: Check batch id is closed, no open batch is found!';
+	 let Sql_query varchar := 'INSERT INTO ' ||:schema_path || 'lit_task_run_tracking(ETL_RUN_ID,SRC_SYS_FEQ_CD,STG_TB_NAME,CORE_TB_NAME,TASK_NAME,TASK_RUN_DATE,TASK_RUN_STATS,DESC) VALUES(0,''' ||:src_sys_cd || ''',''CTRY_STG'',''CTRY'',''lit_ctry_root_t1'',' || current_timestamp() ||',''Fail'',''sub task failed,due to batch id is not found open'');';
+        sql_output := (EXECUTE IMMEDIATE :Sql_query);
+	       call system$set_return_value('Failed');
+   end if;
+    call system$set_return_value(:ETL_RUN_ID);  
+ end;
+ 
+ 
+CREATE or replace TASK cbt_legal_dia_dev.l1_Lit.gen_bkey_ctry_t1
+WITH TAG (cbt_legal_dia_dev.l1_Lit.lit_task_bucket_tg='lawmanager')
+warehouse = CMPT_WH_CBT_LEGAL_DIA_DEV
+After cbt_legal_dia_dev.l1_Lit.lit_ctry_root_t1
+  AS
+  declare 
+  --return_val varchar := (system$get_predecessor_return_value());  
+  proc_return_val varchar;
+  ETL_RUN_ID number := (system$get_predecessor_return_value());
+  src_sys_cd varchar := SYSTEM$GET_TASK_GRAPH_CONFIG('src_sys_cd')::string;
+  db_name varchar := SYSTEM$GET_TASK_GRAPH_CONFIG('db_name')::string;
+  schema_core varchar := SYSTEM$GET_TASK_GRAPH_CONFIG('schema_core')::string;
+  schema_path varchar := concat(:db_name,'.',:schema_core,'.');
+  sql_output resultset;
+  begin
+  
+	start transaction name ctry_t;
+    call l1_lit.generate_bkey('CTRY_STG') into :proc_return_val;
+    if (UPPER(:proc_return_val) not LIKE 'ERROR%') then 
+        let Sql_query varchar := 'INSERT INTO ' ||:schema_path || 'lit_task_run_tracking(ETL_RUN_ID,SRC_SYS_FEQ_CD,STG_TB_NAME,CORE_TB_NAME,TASK_NAME,TASK_RUN_DATE,TASK_RUN_STATS,DESC) VALUES(' || :ETL_RUN_ID ||',''' ||:src_sys_cd || ''',''CTRY_STG'',''CTRY'',''gen_bkey_ctry_t1'',' || current_timestamp() ||',''Pass'',''sub task completed successfully'');';
+        sql_output := (EXECUTE IMMEDIATE :Sql_query);
+        call system$set_return_value(:ETL_RUN_ID);
+	   commit ;
+    else
+		rollback ;
+        let Sql_query varchar := 'INSERT INTO ' ||:schema_path || 'lit_task_run_tracking(ETL_RUN_ID,SRC_SYS_FEQ_CD,STG_TB_NAME,CORE_TB_NAME,TASK_NAME,TASK_RUN_DATE,TASK_RUN_STATS,DESC) VALUES(' || :ETL_RUN_ID ||',''' ||:src_sys_cd || ''',''CTRY_STG'',''CTRY'',''gen_bkey_ctry_t1'',' || current_timestamp() ||',''Fail'',''sub task failed,due to bkey proedure failed'');';
+        sql_output := (EXECUTE IMMEDIATE :Sql_query);
+        call system$set_return_value('Failed');
+		
+    end if ;
+  end;  
+
+  
+  
+  
+CREATE or replace TASK cbt_legal_dia_dev.l1_Lit.core_CTRY_load_t1
+WITH TAG (cbt_legal_dia_dev.l1_Lit.lit_task_bucket_tg='lawmanager')
+warehouse = CMPT_WH_CBT_LEGAL_DIA_DEV
+After cbt_legal_dia_dev.l1_Lit.gen_bkey_ctry_t1
+AS
+declare 
+   --ETL_RUN_ID number := (system$get_predecessor_return_value());  
+   ETL_RUN_ID varchar := (system$get_predecessor_return_value());
+   proc_return_val varchar;
+begin
+    LET src_sys_cd varchar := SYSTEM$GET_TASK_GRAPH_CONFIG('src_sys_cd')::string;
+    start transaction name ctry_t;
+    call  cbt_legal_dia_dev.L1_LIT.refresh_ctry('IMG_CTRY_VIEW','ctry') into :proc_return_val;
+    If (UPPER(:proc_return_val) not LIKE 'ERROR%') then 
+          INSERT INTO cbt_legal_dia_dev.l1_lit.lit_task_run_tracking(ETL_RUN_ID,SRC_SYS_FEQ_CD,STG_TB_NAME,CORE_TB_NAME,TASK_NAME,TASK_RUN_DATE,TASK_RUN_STATS,DESC) 
+             VALUES(101,:src_sys_cd,'CTRY_STG','CTRY','core_CTRY_load_t1',current_timestamp(),'Pass','Completed successfully');
+			 call system$set_return_value('Done');
+		     commit;
+    else
+	      rollback;
+          INSERT INTO cbt_legal_dia_dev.l1_lit.lit_task_run_tracking(ETL_RUN_ID,SRC_SYS_FEQ_CD,STG_TB_NAME,CORE_TB_NAME,TASK_NAME,TASK_RUN_DATE,TASK_RUN_STATS,DESC) 
+             VALUES(101,:src_sys_cd,'CTRY_STG','CTRY','core_CTRY_load_t1',current_timestamp(),'Faile','sub task failed');
+        call system$set_return_value('Failed');
+    end if;
+end;
+
+
+create or replace task cbt_legal_dia_dev.l1_Lit.lit_ctry_root_t1_finalize_task 
+warehouse = CMPT_WH_CBT_LEGAL_DIA_DEV
+finalize = cbt_legal_dia_dev.l1_Lit.lit_ctry_root_t1
+as 
+declare 
+email_list varchar;
+sql_output resultset;
+begin 
+--sql_output := (update l1_lit.LMM_EDW_RUN_ID_CNTL set SCSS_FLG='Y' where src_sys_freq_cd='LAWMGR-D' and SCSS_FLG='N');
+ CALL SYSTEM$SEND_EMAIL(
+      'cbt_legal_dia_email_integration_dev',
+      'nbaig1@its.jnj.com',
+      'Email Alert: task core_CTRY_load_t1 is completed!',
+	  'Root1 series task are successfully completed');
+end;
