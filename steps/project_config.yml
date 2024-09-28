@@ -1,0 +1,39 @@
+version: 0.2
+CANONICAL:
+    DATABASE_NAME: ABBV_SMDW_DEV
+    SCHEMA_NAME: DIL
+    ROLE_NAME: 'ROLE'
+    ENTITIES_HCP:
+        - MDMID: value
+        - ABSCalculationDate: value
+        - ABSCode: value
+        - Degree: value
+        - Name: value
+        - FirstName: value
+        - Middlename: value
+        - LastName: value
+        - Title: value
+        - Prefix: value
+        - NameSuffix: value
+        - Gender: value
+        - DoB: value
+        - YoB: value
+        - PaymentIndicator: value
+        - KaiserProvider: value
+        - DoNotContact: value
+        - PrescriberStatus: value
+        - PresumedDead: value
+        - ProfType: value
+        - TypeOfPractice: value
+        - MajorProfessionalActivity: value
+        - PresentEmployment: value
+        - Employer: value
+        - DeceasedFlag: value
+        - RestrictedState: value
+        - NextRecentFormerName: value
+        - NoOfOffices: value
+        - SecondaryDegree: value
+        - SFAFlag: value
+        - Retired: value
+        - Status: value
+

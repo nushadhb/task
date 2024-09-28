@@ -1,0 +1,13 @@
+definition_version: 1
+snowpark:
+  project_name: "BaigSnowpark"
+  stage_name: "db_naushad.snowflake_git_pythoncode"
+  src: "taks/"
+  procedures:
+    - name: "filter_sp"
+      database: "db_naushad"
+      schema: "harmonized"
+      handler: "filter.main"
+      runtime: "3.10"
+      signature: ""
+      returns: string
