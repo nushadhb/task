@@ -1,4 +1,12 @@
 from snowflake.snowpark.functions import col
+from snowflake.snowpark.files import SnowflakeFile
+
+import snowflake.snowpark as snowpark
+from snowflake.snowpark import Session
+from snowflake.snowpark.functions import col
+import pandas as pd
+import snowflake.snowpark.functions as F
+import yaml
 
 def filter_by_role(session, table_name, role):
   df = session.table(table_name)
@@ -13,7 +21,10 @@ def get_unpack_sql(session,project_name,interface_name):
     #config_yaml = snowflake.snowpark.files.SnowflakeFile.open
     #config_yaml= '@DB_NAUSHAD.SCHEMA_NAUSHAD.SNOWFLAKE_GIT_PYTHONCODE/branches/main/steps/project_config.yml'
     #with open(config_yaml,"r") as f:
-    with snowflake.snowpark.files.SnowflakeFile.open(config_yaml) as f:
+    scope_url = session.sql("select BUILD_SCOPED_FILE_URL(@STGS3, 'project_config.yml') as sc_url")
+    scope_url= scope_url.select("sc_url").collect()
+    sc_url= scope_url[0][0]
+    with  SnowflakeFile.open(sc_url) as f: 
         config_read=yaml.safe_load(f)
         column_list = config_read["CANONICAL"][interface_name]
         database_name = config_read["CANONICAL"]["DATABASE_NAME"]
