@@ -7,7 +7,7 @@ from snowflake.snowpark.functions import col
 import pandas as pd
 import snowflake.snowpark.functions as F
 import yaml
-import common_class.py as comm_c
+import common_class as comm_c
 
 def filter_by_role(session, table_name, role):
   df = session.table(table_name)
