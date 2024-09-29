@@ -17,7 +17,7 @@ def filter_by_territory(session,table_name,territory):
   return df.filter(col("territory") == territory)
 
 def get_unpack_sql(session,project_name,interface_name):
-    config_yaml=project_config.yml
+    #config_yaml=project_config.yml
     #config_yaml = snowflake.snowpark.files.SnowflakeFile.open
     #config_yaml= '@DB_NAUSHAD.SCHEMA_NAUSHAD.SNOWFLAKE_GIT_PYTHONCODE/branches/main/steps/project_config.yml'
     #with open(config_yaml,"r") as f:
