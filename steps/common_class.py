@@ -1,13 +1,21 @@
 import sys ,io
 import yaml
+import snowflake.snowpark as snowpark
+from snowflake.snowpark import Session
+from snowflake.snowpark.functions import col
+import pandas as pd
+import snowflake.snowpark.functions as F
+import yaml
+from snowflake.snowpark.files import SnowflakeFile
+from snowflake.snowpark.functions import col
 
-class common_class:
+class common_class(session):
        def __init__(self,project: str, entity: str):
            self.project_name = project
            self.interface_name =  entity #"ENTITIES_HCP"
            self.config_yaml = "config.yaml"
 
-       def get_unpack_sql(self):
+       def get_unpack_sql(session,(self):
            with open(self.config_yaml,"r") as f:
                config_read=yaml.safe_load(f)
                column_list = config_read["CANONICAL"][self.interface_name]
@@ -32,13 +40,21 @@ class common_class:
 
                unpack_sql = "SELECT \n {} \n {} \n {}  \n {} \n {};".format(unpack_1, from_clause, unpack_2, where_clause,unpack_3)
            return unpack_sql
+       def get_scope_url(session,self,stg_name):
+           config_yaml=self.config_yaml
+           select_sql = "select BUILD_SCOPED_FILE_URL({}, {}) as sc_url;".format(config_yaml,stg_name)
+           scope_url = session.sql(select_sql)
+           scope_url= scope_url.select("sc_url").collect()
+           sc_url= scope_url[0][0]
+    
 
 if __name__=="__main__":
+    with Session.builder.getOrCreate() as session:
+        calssOjbect = common_class(session,project="CANONICAL",entity="ENTITIES_HCP")
 
-    calssOjbect = common_class(project="CANONICAL",entity="ENTITIES_HCP")
+        for i in range(20*5):
+            print("-",end='')
+        print("\n")
+        print(calssOjbect.get_unpack_sql(session))
 
-    for i in range(20*5):
-        print("-",end='')
-    print("\n")
-    print(calssOjbect.get_unpack_sql())
 
