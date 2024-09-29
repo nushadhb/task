@@ -47,5 +47,8 @@ def get_unpack_sql(session,project_name,interface_name):
         from_clause = "FROM {}.{}.{}_VW_STREAMS P".format(database_name, schema_name, interface_name)
 
         unpack_sql = "SELECT \n {} \n {} \n {}  \n {} \n {};".format(unpack_1, from_clause, unpack_2, where_clause,unpack_3)
+
+        #call get_config('abacd','ENTITIES_HCP');
+
         return unpack_sql
 
