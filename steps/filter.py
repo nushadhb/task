@@ -1,5 +1,4 @@
 from snowflake.snowpark.functions import col
-import project_config.yml
 
 def filter_by_role(session, table_name, role):
   df = session.table(table_name)
@@ -11,8 +10,10 @@ def filter_by_territory(session,table_name,territory):
 
 def get_unpack_sql(session,project_name,interface_name):
     config_yaml=project_config.yml
+    #config_yaml = snowflake.snowpark.files.SnowflakeFile.open
     #config_yaml= '@DB_NAUSHAD.SCHEMA_NAUSHAD.SNOWFLAKE_GIT_PYTHONCODE/branches/main/steps/project_config.yml'
-    with open(config_yaml,"r") as f:
+    #with open(config_yaml,"r") as f:
+    with snowflake.snowpark.files.SnowflakeFile.open(config_yaml) as f:
         config_read=yaml.safe_load(f)
         column_list = config_read["CANONICAL"][interface_name]
         database_name = config_read["CANONICAL"]["DATABASE_NAME"]
