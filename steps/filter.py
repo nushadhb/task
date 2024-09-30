@@ -8,6 +8,13 @@ import pandas as pd
 import snowflake.snowpark.functions as F
 import yaml
 #import common_class as comm_c
+session.custom_package_usage_config = {"enabled": True}
+session.add_packages(["common_class.py"])
+
+def get_json_sql(session,json_entity):
+    classObject = common_class(session,project="CANONICAL",entity="ENTITIES_HCP")
+    get_unpack_sql = calssOjbect.get_unpack_sql(session,'ENTITIES_HCP')
+    return get_unpack_sql
 
 def filter_by_role(session, table_name, role):
   df = session.table(table_name)
