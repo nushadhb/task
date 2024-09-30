@@ -7,7 +7,7 @@ import yaml
 from snowflake.snowpark.files import SnowflakeFile
 from snowflake.snowpark.functions import col
 
-class common_class():
+class class_common_config():
        config_yaml = "project_config.yml"
        interface_name = "ENTITIES_HCP"
        #from snowflake.snowpark import Session
@@ -64,8 +64,8 @@ def main(session):
 
     # # Print a sample of the dataframe to standard output.
     # dataframe.show()
-    calssOjbect = common_class(session,project="CANONICAL",entity="ENTITIES_HCP")
-    common_class.interface_name = "ENTITIES_HCP"
+    calssOjbect = class_common_config(session,project="CANONICAL",entity="ENTITIES_HCP")
+    class_common_config.interface_name = "ENTITIES_HCP"
     print(calssOjbect.get_unpack_sql(session))
    
     return dataframe
