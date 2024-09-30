@@ -8,8 +8,8 @@ import pandas as pd
 import snowflake.snowpark.functions as F
 import yaml
 #import common_class as comm_c
-session.custom_package_usage_config = {"enabled": True}
-session.add_packages(["common_class.py"])
+#session.custom_package_usage_config = {"enabled": True}
+#session.add_packages(["common_class.py"])
 
 #def get_json_sql(session):
 #    classObject = common_class(session,project="CANONICAL",entity="ENTITIES_HCP")
