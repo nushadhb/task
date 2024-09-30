@@ -11,7 +11,7 @@ import yaml
 session.custom_package_usage_config = {"enabled": True}
 session.add_packages(["common_class.py"])
 
-def get_json_sql(session,json_entity):
+def get_json_sql(json_entity,session):
     classObject = common_class(session,project="CANONICAL",entity="ENTITIES_HCP")
     get_unpack_sql = calssOjbect.get_unpack_sql(session,'ENTITIES_HCP')
     return get_unpack_sql
