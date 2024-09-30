@@ -11,10 +11,10 @@ import yaml
 session.custom_package_usage_config = {"enabled": True}
 session.add_packages(["common_class.py"])
 
-def get_json_sql(session):
-    classObject = common_class(session,project="CANONICAL",entity="ENTITIES_HCP")
-    get_unpack_sql = calssOjbect.get_unpack_sql(session,'ENTITIES_HCP')
-    return get_unpack_sql
+#def get_json_sql(session):
+#    classObject = common_class(session,project="CANONICAL",entity="ENTITIES_HCP")
+#    get_unpack_sql = calssOjbect.get_unpack_sql(session,'ENTITIES_HCP')
+#    return get_unpack_sql
 
 def filter_by_role(session, table_name, role):
   df = session.table(table_name)
