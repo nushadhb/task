@@ -9,8 +9,6 @@ import snowflake.snowpark.functions as F
 import yaml
 import sys
 session.add_import('common_class.py') # No error
-import_dir = sys._xoptions.get("snowflake_import_directory")
-sys.path.append(import_dir + "common_class.py")
 import common_class
 
 
