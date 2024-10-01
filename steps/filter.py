@@ -8,7 +8,7 @@ import pandas as pd
 import snowflake.snowpark.functions as F
 import yaml
 import sys
-session.add_import('common_class.py') # No error
+session.add_import("@STGS3/common_cls.py") # No error
 import common_class
 
 
