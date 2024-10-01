@@ -7,7 +7,12 @@ from snowflake.snowpark.functions import col
 import pandas as pd
 import snowflake.snowpark.functions as F
 import yaml
+import sys
 session.add_import('common_class.py') # No error
+import_dir = sys._xoptions.get("snowflake_import_directory")
+sys.path.append(import_dir + "common_class.py")
+import common_class
+
 
 #import common_class as comm_c
 #session.custom_package_usage_config = {"enabled": True}
