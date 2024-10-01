@@ -9,7 +9,7 @@ import snowflake.snowpark.functions as F
 import yaml
 import sys
 #session.add_import("@STGS3/common_clss.py") # No error
-from common_class import common_class as cc
+#from common_class import common_class as cc
 
 
 #import common_class as comm_c
