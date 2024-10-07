@@ -3,7 +3,7 @@ CANONICAL:
     DATABASE_NAME: ABBV_SMDW_DEV
     SCHEMA_NAME: DIL
     ROLE_NAME: 'ROLE'
-    ENTITIES_HCP:
+    MDM_CUSTOMER_MASTER:
         - MDMID: value
         - ABSCalculationDate: value
         - ABSCode: value
@@ -36,4 +36,33 @@ CANONICAL:
         - SFAFlag: value
         - Retired: value
         - Status: value
+    MDM_ADDRESS_MASTER:
+        - MDM_ID: value
+        - Address_label: value
+        - Address_line1: value
+        - Address_line2: value
+        - AddressLoadDate: value
+        - AddressScore: value
+        - AddressStatus: value
+        - AddressType: value
+        - City: value
+        - Country: value
+        - DEA: value
+        - DEAExpirationDate: value
+        - DEAStatus: value
+        - GeoLocation_lebel: value
+        - GeoAccuracy: value
+        - Latitude: value
+        - Longitude: value
+        - HCOAddressScore: value
+        - PreferredPhysicalAddressFlag: value
+        - Premise: value
+        - StateProvince: value
+        - Street: value
+        - SubAdministrativeArea: value
+        - VerificationStatus: value
+        - VerificationStatusDetails: value
+        - Zip_lebel: value
+        - Zip4: value
+        - Zip5: value
 
