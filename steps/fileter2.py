@@ -86,7 +86,7 @@ def get_sql(session,interface_name: str):
         where_clause = ' WHERE "type"=''configuration/entityTypes/HCP'''
 
         #confg_yaml =config_yaml_data
-        column_list= conf_read["CANONICAL"][interface_name]
+        column_list= config_read["CANONICAL"][interface_name]
     # for my_dec in column_list:
     #     c=list(my_dec.keys())[0]
     #     print(c)
