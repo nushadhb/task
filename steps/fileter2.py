@@ -61,13 +61,13 @@ def build_flatten_class(session,Objects) -> str:
         # exit(0)
     elif Objects[0] in Dea_list:
         print(str1)
-        str1 = "LATERAL FLATTEN(input => DEA.value:value ,path => {}, outer => true) {}".format(Objects[0], Objects[0])
+        str1 = "LATERAL FLATTEN(input => DEA.value:value ,path => '{}', outer => true) {}".format(Objects[0], Objects[0])
     elif Objects[0] in Geo_list:
         print(str1)
-        str1 = "LATERAL FLATTEN(input => GeoLocation.value:value ,path => {}, outer => true) {}".format(Objects[0], Objects[0])
+        str1 = "LATERAL FLATTEN(input => GeoLocation.value:value ,path => '{}', outer => true) {}".format(Objects[0], Objects[0])
     elif Objects[0] in zip_list:
         print(str1)
-        str1 = "LATERAL FLATTEN(input => Zip.value:value ,path => {}, outer => true) {}".format(Objects[0], Objects[0])
+        str1 = "LATERAL FLATTEN(input => Zip.value:value ,path => '{}', outer => true) {}".format(Objects[0], Objects[0])
     else:
         str1 ="LATERAL FLATTEN(input => ""attributes"":" + Objects[0] + ", outer => true) {}".format(Objects[0])
     return str1
