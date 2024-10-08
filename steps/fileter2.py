@@ -54,9 +54,9 @@ def cust_address(session,config_file,interface_name):
 def build_flatten_class(session,Objects) -> str:
     str1=''
     #return "LATERAL FLATTEN(input => ""attributes"":" + Objects[0] + ", outer => true) {}".format(Objects[0])
-    if Objects[0] in Address_list:
+    if Objects[0].strip() in Address_list:
 
-        str1 = "LATERAL FLATTEN(input => Adddress.value:value ,path => {}, outer => true) {}".format(Objects[0], Objects[0])
+        str1 = "LATERAL FLATTEN(input => Address.value:value ,path => {}, outer => true) {}".format(Objects[0], Objects[0])
         print(str1)
         # exit(0)
     elif Objects[0] in Dea_list:
