@@ -98,24 +98,25 @@ def get_sql(session,interface_name: str):
         # print(((list(my_dec.items())[0])[1])[1])
         #exit(0)
     #select section of unpack sql
-        unpack_1=[list(my_dec.keys())[0] + ".value:" + (list(my_dec.values())[0])[0]\
+        column_unpack_1=[list(my_dec.keys())[0] + ".value:" + (list(my_dec.values())[0])[0]\
                 + "::" + (list(my_dec.values())[0])[1] + " as {}".format(list(my_dec.keys())[0]) for my_dec in column_list ]
-        unpack_1 = ",".join(unpack_1)
+        column_unpack_1 = ",".join(column_unpack_1)
     #lateral flatten section of unpack sql
-        unpack_2 = [build_flatten_class(session,list(my_dec.keys())) for my_dec in column_list]
-        unpack_2=",".join(unpack_2)
+        flatten_unpack_2 = [build_flatten_class(session,list(my_dec.keys())) for my_dec in column_list]
+        flatten_unpack_2=",".join(flatten_unpack_2)
                  
     #fitler section of unpack sql
-        unpack_3=''
+        filter_unpack_3=''
         if interface_name == 'MDM_CUSTOMER_MASTER':
-            unpack_3 = [build_filter_class(session,list(my_dec.items())[0]) for my_dec in column_list]
-            unpack_3 = " AND ".join(unpack_3)
+            filter_unpack_3 = [build_filter_class(session,list(my_dec.items())[0]) for my_dec in column_list]
+            filter_unpack_3 = " AND ".join(filter_unpack_3)
 
     #build from class of unpack sql
         from_clause = "FROM {}.{}.{}_VW_STREAMS P".format(database_name,schema_name,interface_name)
 
     #build full unpack sql
-        unpack_sql = "CREATE OR REPLACE TABLE STG_{} AS SELECT \n {} \n {} ,\n {}  \n  {} \n {}".format(interface_name,unpack_1, from_clause, unpack_2,where_clause,unpack_3)
+        #unpack_sql = "CREATE OR REPLACE TABLE STG_{} AS SELECT \n {} \n {} ,\n {}  \n  {} \n {}".format(interface_name,column_unpack_1, from_clause, flatten_unpack_2,where_clause,filter_unpack_3)
+        unpack_sql = "CREATE OR REPLACE TABLE STG_{} AS SELECT \n {} \n {} ,\n {}  \n {}".format(interface_name,column_unpack_1, from_clause, flatten_unpack_2,filter_unpack_3)
      #create stg tables 
         session.sql("create or replace table abac_test(empid number)").collect()
     return unpack_sql
