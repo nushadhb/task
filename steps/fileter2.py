@@ -56,7 +56,7 @@ def build_flatten_class(session,Objects) -> str:
     #return "LATERAL FLATTEN(input => ""attributes"":" + Objects[0] + ", outer => true) {}".format(Objects[0])
     if Objects[0].strip() in Address_list:
 
-        str1 = "LATERAL FLATTEN(input => Address.value:value ,path => {}, outer => true) {}".format(Objects[0], Objects[0])
+        str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(Objects[0], Objects[0])
         print(str1)
         # exit(0)
     elif Objects[0] in Dea_list:
@@ -113,7 +113,7 @@ def get_sql(session,interface_name: str):
         from_clause = "FROM {}.{}.{}_VW_STREAMS P".format(database_name,schema_name,interface_name)
 
     #build full unpack sql
-        unpack_sql = "SELECT \n {} \n {} ,\n {}  \n where {} \n {}".format(unpack_1, from_clause, unpack_2,where_clause,unpack_3)
+        unpack_sql = "SELECT \n {} \n {} ,\n {}  \n  {} \n {}".format(unpack_1, from_clause, unpack_2,where_clause,unpack_3)
 
     return unpack_sql
 
