@@ -36,7 +36,7 @@ Geo_list=['GeoAccuracy','Latitude','Longitude','HCOAddressScore','PreferredPhysi
           'Street','SubAdministrativeArea','VerificationStatus','VerificationStatusDetails',\
          'Zip', ]
 zip_list=['Zip4','Zip5']
-Eduction_list=['SchoolName','Type','Degree','YearsInProgram','GraduationYear','StartYear','EndYear','FieldofStudy','ConfirmationFlag','SchoolCode','State','EducationEndDate']
+Education_list=['SchoolName','Type','Degree','YearsInProgram','GraduationYear','StartYear','EndYear','FieldofStudy','ConfirmationFlag','SchoolCode','State','EducationEndDate']
 
 def cust_address(session,config_file,interface_name):
     pass
