@@ -69,7 +69,7 @@ def build_flatten_class(session,Objects) -> str:
         print(str1)
         str1 = "LATERAL FLATTEN(input => Zip.value:value ,path => '{}', outer => true) {}".format(Objects[0], Objects[0])
     else:
-        str1 ="LATERAL FLATTEN(input => ""attributes"":" + Objects[0] + ", outer => true) {}".format(Objects[0])
+        str1 ="LATERAL FLATTEN(input => src:attributes:" + Objects[0] + ", outer => true) {}".format(Objects[0])
     return str1
 def build_filter_class(session,Objects):
     return "NVL({}.value:ov::string,'true')='true'".format(Objects[0])
@@ -106,7 +106,7 @@ def get_sql(session,interface_name: str):
         unpack_2=",".join(unpack_2)
                  
     #fitler section of unpack sql
-        unpack_3=None
+        unpack_3=''
         if interface_name == 'MDM_CUSTOMER_MASTER':
             unpack_3 = [build_filter_class(session,list(my_dec.items())[0]) for my_dec in column_list]
             unpack_3 = " AND ".join(unpack_3)
