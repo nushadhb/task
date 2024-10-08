@@ -112,13 +112,15 @@ def get_sql(session,interface_name: str):
             filter_unpack_3 = " AND ".join(filter_unpack_3)
 
     #build from class of unpack sql
-        from_clause = "FROM {}.{}.{}_VW_STREAMS P".format(database_name,schema_name,interface_name)
+        #from_clause = "FROM {}.{}.{}_VW_STREAMS P".format(database_name,schema_name,interface_name)
+        from_clause = "FROM {}.{}.{}_VW_STREAMS P".format('db_naushad','schema_naushad','car_sales1')
 
     #build full unpack sql
         #unpack_sql = "CREATE OR REPLACE TABLE STG_{} AS SELECT \n {} \n {} ,\n {}  \n  {} \n {}".format(interface_name,column_unpack_1, from_clause, flatten_unpack_2,where_clause,filter_unpack_3)
         unpack_sql = "CREATE OR REPLACE TABLE STG_{} AS SELECT \n {} \n {} ,\n {}  \n {}".format(interface_name,column_unpack_1, from_clause, flatten_unpack_2,filter_unpack_3)
      #create stg tables 
-        session.sql("create or replace table abac_test(empid number)").collect()
+        #session.sql("create or replace table abac_test(empid number)").collect()
+        session.sql(unpack_sql).collect()
     return unpack_sql
 
 #if __name__ == "__main__":
