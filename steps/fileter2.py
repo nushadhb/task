@@ -78,15 +78,15 @@ def get_sql(session,interface_name: str):
     scope_url = session.sql("select BUILD_SCOPED_FILE_URL(@STGS3, 'project_config.yml') as sc_url")
     scope_url= scope_url.select("sc_url").collect()
     sc_url= scope_url[0][0]
-    f=open(sc_url)
-    config_read=yaml.safe_load(f)
-    column_list = config_read["CANONICAL"][interface_name]
-    database_name = config_read["CANONICAL"]["DATABASE_NAME"]
-    schema_name = config_read["CANONICAL"]["SCHEMA_NAME"]
-    where_clause = ' WHERE "type"=''configuration/entityTypes/HCP'''
+    with SnowflwkeFile.open(sc_url) as f:
+        config_read=yaml.safe_load(f)
+        column_list = config_read["CANONICAL"][interface_name]
+        database_name = config_read["CANONICAL"]["DATABASE_NAME"]
+        schema_name = config_read["CANONICAL"]["SCHEMA_NAME"]
+        where_clause = ' WHERE "type"=''configuration/entityTypes/HCP'''
 
-    confg_yaml =config_yaml_data
-    column_list= confg_yaml["CANONICAL"][interface_name]
+        confg_yaml =config_yaml_data
+        column_list= conf_read["CANONICAL"][interface_name]
     # for my_dec in column_list:
     #     c=list(my_dec.keys())[0]
     #     print(c)
@@ -98,22 +98,22 @@ def get_sql(session,interface_name: str):
         # print(((list(my_dec.items())[0])[1])[1])
         #exit(0)
     #select section of unpack sql
-    unpack_1=[list(my_dec.keys())[0] + ".value:" + (list(my_dec.values())[0])[0]\
+        unpack_1=[list(my_dec.keys())[0] + ".value:" + (list(my_dec.values())[0])[0]\
                 + "::" + (list(my_dec.values())[0])[1] + " as {}".format(list(my_dec.keys())[0]) for my_dec in column_list ]
-    unpack_1 = ",".join(unpack_1)
+        unpack_1 = ",".join(unpack_1)
     #lateral flatten section of unpack sql
-    unpack_2 = [build_flatten_class(session,list(my_dec.keys())) for my_dec in column_list]
-    unpack_2=",".join(unpack_2)
+        unpack_2 = [build_flatten_class(session,list(my_dec.keys())) for my_dec in column_list]
+        unpack_2=",".join(unpack_2)
 
     #fitler section of unpack sql
-    unpack_3 = [build_filter_class(session,list(my_dec.items())[0]) for my_dec in column_list]
-    unpack_3 = " AND ".join(unpack_3)
+        unpack_3 = [build_filter_class(session,list(my_dec.items())[0]) for my_dec in column_list]
+        unpack_3 = " AND ".join(unpack_3)
 
     #build from class of unpack sql
-    from_clause = "FROM {}.{}.{}_VW_STREAMS P".format(database_name,schema_name,interface_name)
+        from_clause = "FROM {}.{}.{}_VW_STREAMS P".format(database_name,schema_name,interface_name)
 
     #build full unpack sql
-    unpack_sql = "SELECT \n {} \n {} ,\n {}  \n where {} \n {}".format(unpack_1, from_clause, unpack_2,where_clause,unpack_3)
+        unpack_sql = "SELECT \n {} \n {} ,\n {}  \n where {} \n {}".format(unpack_1, from_clause, unpack_2,where_clause,unpack_3)
 
     return unpack_sql
 
