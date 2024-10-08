@@ -36,6 +36,7 @@ Geo_list=['GeoAccuracy','Latitude','Longitude','HCOAddressScore','PreferredPhysi
           'Street','SubAdministrativeArea','VerificationStatus','VerificationStatusDetails',\
          'Zip', ]
 zip_list=['Zip4','Zip5']
+Eduction_list=['SchoolName','Type','Degree','YearsInProgram','GraduationYear','StartYear','EndYear','FieldofStudy','ConfirmationFlag','SchoolCode','State','EducationEndDate']
 
 def cust_address(session,config_file,interface_name):
     pass
@@ -68,6 +69,9 @@ def build_flatten_class(session,Objects) -> str:
     elif Objects[0] in zip_list:
         print(str1)
         str1 = "LATERAL FLATTEN(input => Zip.value:value ,path => '{}', outer => true) {}".format(Objects[0], Objects[0])
+    elif Objects[0] in Education_list:
+        print(str1)
+        str1 = "LATERAL FLATTEN(input => Education.value:value ,path => '{}', outer => true) {}".format(Objects[0], Objects[0])
     else:
         str1 ="LATERAL FLATTEN(input => src:attributes:" + Objects[0] + ", outer => true) {}".format(Objects[0])
     return str1
