@@ -50,7 +50,7 @@ CANONICAL:
         - DEA: [value,string]
         - DEAExpirationDate: [value,string]
         - DEAStatus: [value,string]
-        - GeoLocation_lebel: [value,string]
+        - GeoLocation: [label,string]
         - GeoAccuracy: [value,string]
         - Latitude: [value,string]
         - Longitude: [value,string]
@@ -62,7 +62,7 @@ CANONICAL:
         - SubAdministrativeArea: [value,string]
         - VerificationStatus: [value,string]
         - VerificationStatusDetails: [value,string]
-        - Zip_lebel: [value,string]
+        - Zip: [value,string]
         - Zip4: [value,string]
         - Zip5: [value,string]
 
