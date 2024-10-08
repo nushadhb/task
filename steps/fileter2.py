@@ -29,7 +29,7 @@ import json
 #schema_name = config_yaml_data["CANONICAL"]["SCHEMA_NAME"]
 #where_clause = '""type""=''configuration/entityTypes/HCP'''
 
-Address_list=['AddressLine1','AddressLine2','AddressLoadDate','AddressScore','AddressStatus','AddressType','City'\
+Address_list=['AddressLine1','AddressLine2','AddressLoadDate','AddressScore','AddressStatus','AddressType','City',\
               'Country','DEA','GeoLocation']
 Dea_list=['ExpirationDate','Status']
 Geo_list=['GeoAccuracy','Latitude','Longitude','HCOAddressScore','PreferredPhysicalAddressFlag','Premise','StateProvince'\
