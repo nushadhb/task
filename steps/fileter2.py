@@ -37,6 +37,8 @@ Geo_list=['GeoAccuracy','Latitude','Longitude','HCOAddressScore','PreferredPhysi
          'Zip', ]
 zip_list=['Zip4','Zip5']
 Education_list=['SchoolName','Type','Degree','YearsInProgram','GraduationYear','StartYear','EndYear','FieldofStudy','ConfirmationFlag','SchoolCode','State','EducationEndDate']
+Team_assignment_address_list=['AddressID','AddressLine1','AddressLine2','City','StateProvince','Zip4','Zip5']
+Team_assignment_list=['TeamAssignment','AMDMID']
 
 def cust_address(session,config_file,interface_name):
     pass
@@ -72,6 +74,15 @@ def build_flatten_class(session,Objects) -> str:
     elif Objects[0] in Education_list:
         print(str1)
         str1 = "LATERAL FLATTEN(input => Education.value:value ,path => '{}', outer => true) {}".format(Objects[0], Objects[0])
+    elif Objects[0] in Team_assignment_address_list:
+        print(str1)
+        str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(Objects[0], Objects[0])
+    elif Objects[0] in Team_assignment_list:
+        print(str1)
+        if Objects[0] == "TeamAssignment":
+            str1 = "LATERAL FLATTEN(input => TeamAssignment.value:value ,path => 'Address', outer => true) {}".format(Objects[0], Objects[0])
+        else:
+            str1 = "LATERAL FLATTEN(input => TeamAssignment.value:value ,path => {}, outer => true) {}".format(Objects[0], Objects[0])
     else:
         str1 ="LATERAL FLATTEN(input => src:attributes:" + Objects[0] + ", outer => true) {}".format(Objects[0])
     return str1
