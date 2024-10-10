@@ -41,6 +41,7 @@ Team_assignment_address_list=['AddressID','AddressLine1','AddressLine2','City','
 Team_assignment_list=['TeamAssignment','AMDMID']
 
 v_json_prev_field=[]  # Global variable 
+v_table_name='' # global variable
 def cust_address(session,config_file,interface_name):
     pass
 
@@ -76,7 +77,7 @@ def build_flatten_class(session,Objects) -> str:
         elif v_json_field.strip() in Team_assignment_address_list:
             print(str1)
             str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
-        elif v_table_name=='MDM_CUSTOMER_SALESTEAM' and  v_json_field.strip() in Team_assignment_list:
+        elif v_table_name == 'MDM_CUSTOMER_SALESTEAM' and  v_json_field.strip() in Team_assignment_list:
             print(str1)
             if v_json_field.strip() == "TeamAssignment":
                 str1 = "LATERAL FLATTEN(input => {}.value:value ,path => {}, outer => true) {}".format(v_json_field,'Address','Address')
