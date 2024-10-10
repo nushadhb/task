@@ -70,7 +70,7 @@ def build_flatten_class(session,Objects) -> str:
         elif v_json_field.strip() in Geo_list:
             print(str1)
             str1 = "LATERAL FLATTEN(input => GeoLocation.value:value ,path => '{}', outer => true) {}".format(v_json_field,v_json_field)
-        elif v_json_field.strip() in zip_list:
+        elif v_table_name == 'MDM_ADDRESS_MASTER' and v_json_field.strip() in zip_list:
             print(str1)
             str1 = "LATERAL FLATTEN(input => Zip.value:value ,path => '{}', outer => true) {}".format(v_json_field,v_json_field)
         elif v_json_field.strip() in Education_list:
