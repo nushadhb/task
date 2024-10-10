@@ -99,7 +99,7 @@ def build_filter_class(session,Objects):
     return "NVL({}.value:ov::string,'true')='true'".format(v_json_field)
 
 def get_sql(session,interface_name: str):
-    scope_url = session.sql("select BUILD_SCOPED_FILE_URL(@STGS3, 'project_config.yml') as sc_url")
+    scope_url = session.sql("select BUILD_SCOPED_FILE_URL(@STGS3, 'project_config3.yml') as sc_url")
     scope_url= scope_url.select("sc_url").collect()
     sc_url= scope_url[0][0]
     with SnowflakeFile.open(sc_url) as f:
