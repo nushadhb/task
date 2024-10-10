@@ -134,7 +134,7 @@ def get_sql(session,interface_name: str):
     #lateral flatten section of unpack sql
         flatten_unpack_2 = [build_flatten_class(session,my_dec) for my_dec in column_list]
         flatten_unpack_2="\n,".join(flatten_unpack_2)
-        flatten_unpack_2.replace(',,',',')         
+        flatten_unpack_2.replace(',--','')         
     #fitler section of unpack sql
         filter_unpack_3=''
         if interface_name == 'MDM_CUSTOMER_MASTER':
