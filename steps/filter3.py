@@ -43,17 +43,6 @@ Team_assignment_list=['TeamAssignment','AMDMID']
 v_json_prev_field=[]  # Global variable 
 def cust_address(session,config_file,interface_name):
     pass
-# def build_customer_master(Objects):
-#
-#     if Objects[0] in address_list:
-#         str = "LATERAL FLATTEN(input => Adddress.value:value ,path => {}, outer => true) {}".format(Objects[0],Objects[0])
-#         print(str)
-#         exit(0)
-#     if Objects[0] in Dea_list:
-#         str = "LATERAL FLATTEN(input => DEA.value:value ,path => {}, outer => true) {}".format(Objects[0],Objects[0])
-#     if Objects[0] in Geo_list:
-#         str = "LATERAL FLATTEN(input => GeoLocation.value:value ,path => {}, outer => true) {}".format(Objects[0], Objects[0])
-#     return str
 
 def build_flatten_class(session,Objects) -> str:
     str1='--'
@@ -87,7 +76,7 @@ def build_flatten_class(session,Objects) -> str:
         elif v_json_field.strip() in Team_assignment_address_list:
             print(str1)
             str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
-        elif v_json_field.strip() in Team_assignment_list:
+        elif if v_table_name=='MDM_CUSTOMER_SALESTEAM' and  v_json_field.strip() in Team_assignment_list:
             print(str1)
             if v_json_field.strip() == "TeamAssignment":
                 str1 = "LATERAL FLATTEN(input => {}.value:value ,path => {}, outer => true) {}".format(v_json_field,'Address','Address')
@@ -105,6 +94,7 @@ def build_filter_class(session,Objects):
     return "NVL({}.value:ov::string,'true')='true'".format(v_json_field)
 
 def get_sql(session,interface_name: str):
+    global v_table_name = interface_name
     scope_url = session.sql("select BUILD_SCOPED_FILE_URL(@STGS3, 'project_config3.yml') as sc_url")
     scope_url= scope_url.select("sc_url").collect()
     sc_url= scope_url[0][0]
