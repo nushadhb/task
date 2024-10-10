@@ -77,7 +77,7 @@ def build_flatten_class(session,Objects) -> str:
             str1 = "LATERAL FLATTEN(input => DEA.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
         elif v_json_field.strip() in Geo_list:
             print(str1)
-            str1 = "LATERAL FLATTEN(input => GeoLocation.value:value ,path => '{}', outer => true) {}".format(v_json_field,v_json_fieldO)
+            str1 = "LATERAL FLATTEN(input => GeoLocation.value:value ,path => '{}', outer => true) {}".format(v_json_field,v_json_field)
         elif v_json_field.strip() in zip_list:
             print(str1)
             str1 = "LATERAL FLATTEN(input => Zip.value:value ,path => '{}', outer => true) {}".format(v_json_field,v_json_field)
@@ -140,7 +140,7 @@ def get_sql(session,interface_name: str):
         if interface_name == 'MDM_CUSTOMER_MASTER':
             filter_unpack_3 = [build_filter_class(session,my_dec) for my_dec in column_list]
             filter_unpack_3 = "\n AND ".join(filter_unpack_3)
-
+            filter_unpack_3 = "WHERE " + filter_unpack_3
     #build from class of unpack sql
         #from_clause = "FROM {}.{}.{}_VW_STREAMS P".format(database_name,schema_name,interface_name)
         from_clause = "FROM {}.{}.{}_VW_STREAMS P".format('db_naushad','schema_naushad','car_sales1')
