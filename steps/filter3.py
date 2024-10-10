@@ -62,6 +62,9 @@ def build_flatten_class(session,Objects) -> str:
     v_json_value=list(Objects.values())[0][0]
     v_json_dataType=list(Objects.values())[0][1]
     v_json_alias =list(Objects.values())[0][2]
+
+    global v_json_prev_field
+
     if v_json_field.strip() != v_json_prev_field:
         v_json_prev_field=v_json_field.strip()
 
