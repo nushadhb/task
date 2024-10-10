@@ -95,7 +95,7 @@ def build_flatten_class(session,Objects) -> str:
                 str1 = "LATERAL FLATTEN(input => TeamAssignment.value:value ,path => {}, outer => true) {}".format(v_json_field,v_json_field)
         else:
             str1 ="LATERAL FLATTEN(input => src:attributes:" + v_json_field + ", outer => true) {}".format(v_json_field)
-    return str1
+        return str1
 def build_filter_class(session,Objects):
     v_json_field=list(Objects.keys())[0]
     v_json_value=list(Objects.values())[0][0]
