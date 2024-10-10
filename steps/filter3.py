@@ -31,7 +31,7 @@ import json
 
 Address_list=['AddressLine1','AddressLine2','AddressLoadDate','AddressScore','AddressStatus','AddressType','City',\
               'Country','DEA','GeoLocation']
-Dea_list=['ExpirationDate','Status']
+Dea_list=['ExpirationDate','Status1']
 Geo_list=['GeoAccuracy','Latitude','Longitude','HCOAddressScore','PreferredPhysicalAddressFlag','Premise','StateProvince',\
           'Street','SubAdministrativeArea','VerificationStatus','VerificationStatusDetails',\
          'Zip', ]
