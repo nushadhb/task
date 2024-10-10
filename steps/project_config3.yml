@@ -55,6 +55,7 @@ CANONICAL:
     MDM_CUSTOMER_SALESTEAM:
         - MDMID: [value,STRING,PARTY_ID ]
         - AMDMID: [value,STRING,AMDM_PHYSICIAN_ID ]
+        - TeamAssignment: [NA,STRING,AMDM_PHYSICIAN_ID ]
         - AddressLine1: [value,STRING,ADDRRESS_LINE1 ]
         - AddressLine2: [value,STRING,ADDRRESS_LINE2 ]
         - City: [value,STRING,CITY ]
