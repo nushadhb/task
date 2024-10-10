@@ -37,8 +37,10 @@ Geo_list=['GeoAccuracy','Latitude','Longitude','HCOAddressScore','PreferredPhysi
          'Zip', ]
 zip_list=['Zip4','Zip5']
 Education_list=['SchoolName','Type','Degree','YearsInProgram','GraduationYear','StartYear','EndYear','FieldofStudy','ConfirmationFlag','SchoolCode','State','EducationEndDate']
-Team_assignment_address_list=['AddressID','AddressLine1','AddressLine2','City','StateProvince','Zip4','Zip5']
-Team_assignment_list=['TeamAssignment','AMDMID']
+#Team_assignment_address_list=['AddressID','AddressLine1','AddressLine2','City','StateProvince','Zip4','Zip5']
+#Team_assignment_list=['TeamAssignment','AMDMID']
+
+Team_assignment_list=['TeamAssignment','AMDMID','AddressID','AddressLine1','AddressLine2','City','StateProvince','Zip4','Zip5']
 
 v_json_prev_field=[]  # Global variable 
 v_table_name='' # global variable
@@ -68,21 +70,24 @@ def build_flatten_class(session,Objects) -> str:
         elif v_json_field.strip() in Geo_list:
             print(str1)
             str1 = "LATERAL FLATTEN(input => GeoLocation.value:value ,path => '{}', outer => true) {}".format(v_json_field,v_json_field)
-        elif v_json_field.strip() in zip_list:
+        elif v_json_field.strip() in zip_list::wq!
             print(str1)
             str1 = "LATERAL FLATTEN(input => Zip.value:value ,path => '{}', outer => true) {}".format(v_json_field,v_json_field)
         elif v_json_field.strip() in Education_list:
             print(str1)
             str1 = "LATERAL FLATTEN(input => Education.value:value ,path => '{}', outer => true) {}".format(v_json_field,v_json_field)
-        elif v_json_field.strip() in Team_assignment_address_list:
-            print(str1)
-            str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
+        #elif v_json_field.strip() in Team_assignment_address_list:
+        #    print(str1)
+        #    str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
         elif v_table_name == 'MDM_CUSTOMER_SALESTEAM' and  v_json_field.strip() in Team_assignment_list:
             print(str1)
             if v_json_field.strip() == "TeamAssignment":
                 str1 = "LATERAL FLATTEN(input => {}.value:value ,path => {}, outer => true) {}".format(v_json_field,'Address','Address')
+            elif v_json_field.strip() == "AMDMID":
+                 str1 = "LATERAL FLATTEN(input => TeamAssignment.value:value ,path => {}, outer => true) {}".format(v_json_field,v_json_field)
             else:
-                str1 = "LATERAL FLATTEN(input => TeamAssignment.value:value ,path => {}, outer => true) {}".format(v_json_field,v_json_field)
+                 str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
+
         else:
             str1 ="LATERAL FLATTEN(input => src:attributes:" + v_json_field + ", outer => true) {}".format(v_json_field)
     return str1
