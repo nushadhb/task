@@ -90,7 +90,7 @@ def build_flatten_class(session,Objects) -> str:
         elif v_json_field.strip() in Team_assignment_list:
             print(str1)
             if v_json_field.strip() == "TeamAssignment":
-                str1 = "LATERAL FLATTEN(input => {}.value:value ,path => {}, outer => true) {}".format(v_json_field,'Address')
+                str1 = "LATERAL FLATTEN(input => {}.value:value ,path => {}, outer => true) {}".format(v_json_field,'Address','Address')
             else:
                 str1 = "LATERAL FLATTEN(input => TeamAssignment.value:value ,path => {}, outer => true) {}".format(v_json_field,v_json_field)
         else:
