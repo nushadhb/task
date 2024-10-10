@@ -66,7 +66,7 @@ def build_flatten_class(session,Objects) -> str:
     global v_json_prev_field
 
     if v_json_field.strip() not in v_json_prev_field:
-        v_json_prev_fiel.append(v_json_field.strip())
+        v_json_prev_field.append(v_json_field.strip())
 
         if v_json_field.strip() in Address_list:
             str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
