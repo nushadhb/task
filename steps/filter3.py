@@ -132,7 +132,7 @@ def get_sql(session,interface_name: str):
                 + "::" + (list(my_dec.values())[0])[1] + " as {}".format(list(my_dec.values())[0][2]) for my_dec in column_list if (list(my_dec.values())[0])[0] != 'NA' ]
         column_unpack_1 = "\n,".join(column_unpack_1)
     #lateral flatten section of unpack sql
-        flatten_unpack_2 = [build_flatten_class(session,my_dec) for my_dec in column_list]
+        flatten_unpack_2 = [build_flatten_class(session,my_dec) for my_dec in column_list if list(my_dec.keys())[0] != v_json_prev_field ]
         flatten_unpack_2="\n,".join(flatten_unpack_2)
         flatten_unpack_2.replace(',--','')         
     #fitler section of unpack sql
