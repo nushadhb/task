@@ -56,7 +56,7 @@ def cust_address(session,config_file,interface_name):
 #     return str
 
 def build_flatten_class(session,Objects) -> str:
-    str1=''
+    str1='--'
     #return "LATERAL FLATTEN(input => ""attributes"":" + Objects[0] + ", outer => true) {}".format(Objects[0])
     v_json_field=list(Objects.keys())[0]
     v_json_value=list(Objects.values())[0][0]
