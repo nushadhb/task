@@ -40,7 +40,7 @@ Education_list=['SchoolName','Type','Degree','YearsInProgram','GraduationYear','
 Team_assignment_address_list=['AddressID','AddressLine1','AddressLine2','City','StateProvince','Zip4','Zip5']
 Team_assignment_list=['TeamAssignment','AMDMID']
 
-v_json_prev_field="NA"  # Global variable 
+v_json_prev_field=[]  # Global variable 
 def cust_address(session,config_file,interface_name):
     pass
 # def build_customer_master(Objects):
@@ -65,8 +65,8 @@ def build_flatten_class(session,Objects) -> str:
 
     global v_json_prev_field
 
-    if v_json_field.strip() != v_json_prev_field:
-        v_json_prev_field=v_json_field.strip()
+    if v_json_field.strip() not in v_json_prev_field:
+        v_json_prev_fiel.append(v_json_field.strip())
 
         if v_json_field.strip() in Address_list:
             str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
@@ -132,7 +132,7 @@ def get_sql(session,interface_name: str):
                 + "::" + (list(my_dec.values())[0])[1] + " as {}".format(list(my_dec.values())[0][2]) for my_dec in column_list if (list(my_dec.values())[0])[0] != 'NA' ]
         column_unpack_1 = "\n,".join(column_unpack_1)
     #lateral flatten section of unpack sql
-        flatten_unpack_2 = [build_flatten_class(session,my_dec) for my_dec in column_list if list(my_dec.keys())[0] != v_json_prev_field ]
+        flatten_unpack_2 = [build_flatten_class(session,my_dec) for my_dec in column_list if list(my_dec.keys())[0] not in v_json_prev_field ]
         flatten_unpack_2="\n,".join(flatten_unpack_2)
         flatten_unpack_2.replace(',--','')         
     #fitler section of unpack sql
