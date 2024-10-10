@@ -123,17 +123,17 @@ def get_sql(session,interface_name: str):
         #exit(0)
     #select section of unpack sql
         column_unpack_1=[list(my_dec.keys())[0] + ".value:" + (list(my_dec.values())[0])[0]\
-                + "::" + (list(my_dec.values())[0])[1] + " as {}".format(list(my_dec.keys())[0]) for my_dec in column_list if (list(my_dec.values())[0])[0] != 'NA' ]
-        column_unpack_1 = ",".join(column_unpack_1)
+                + "::" + (list(my_dec.values())[0])[1] + " as {}".format(list(my_dec.values())[0][2]) for my_dec in column_list if (list(my_dec.values())[0])[0] != 'NA' ]
+        column_unpack_1 = "\n,".join(column_unpack_1)
     #lateral flatten section of unpack sql
         flatten_unpack_2 = [build_flatten_class(session,my_dec) for my_dec in column_list]
-        flatten_unpack_2=",".join(flatten_unpack_2)
+        flatten_unpack_2="\n,".join(flatten_unpack_2)
                  
     #fitler section of unpack sql
         filter_unpack_3=''
         if interface_name == 'MDM_CUSTOMER_MASTER':
             filter_unpack_3 = [build_filter_class(session,my_dec) for my_dec in column_list]
-            filter_unpack_3 = " AND ".join(filter_unpack_3)
+            filter_unpack_3 = "\n AND ".join(filter_unpack_3)
 
     #build from class of unpack sql
         #from_clause = "FROM {}.{}.{}_VW_STREAMS P".format(database_name,schema_name,interface_name)
