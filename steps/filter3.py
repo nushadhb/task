@@ -40,7 +40,7 @@ Education_list=['SchoolName','Type','Degree','YearsInProgram','GraduationYear','
 Team_assignment_address_list=['AddressID','AddressLine1','AddressLine2','City','StateProvince','Zip4','Zip5']
 Team_assignment_list=['TeamAssignment','AMDMID']
 
-v_json_prev_field = ''  # Global variable 
+v_json_prev_field = 'NA'  # Global variable 
 def cust_address(session,config_file,interface_name):
     pass
 # def build_customer_master(Objects):
