@@ -57,7 +57,7 @@ def cust_address(session,config_file,interface_name):
 def build_flatten_class(session,Objects) -> str:
     str1=''
     #return "LATERAL FLATTEN(input => ""attributes"":" + Objects[0] + ", outer => true) {}".format(Objects[0])
-    v_jason_field=list(Objects.keys())[0]
+    v_json_field=list(Objects.keys())[0]
     v_json_value=list(Objects.values())[0][0]
     v_json_dataType=list(Objects.values())[0][1]
     v_json_alias =list(Objects.values())[0][2]
@@ -91,7 +91,7 @@ def build_flatten_class(session,Objects) -> str:
         str1 ="LATERAL FLATTEN(input => src:attributes:" + v_json_field + ", outer => true) {}".format(v_json_field)
     return str1
 def build_filter_class(session,Objects):
-    v_jason_field=list(Objects.keys())[0]
+    v_json_field=list(Objects.keys())[0]
     v_json_value=list(Objects.values())[0][0]
     v_json_dataType=list(Objects.values())[0][1]
     v_json_alias =list(Objects.values())[0][2]
