@@ -144,7 +144,7 @@ def get_sql(session,interface_name: str):
         unpack_sql = "CREATE OR REPLACE TABLE STG_{} AS SELECT \n {} \n {} ,\n {}  \n {}".format(interface_name,column_unpack_1, from_clause, flatten_unpack_2,filter_unpack_3)
      #create stg tables 
         #session.sql("create or replace table abac_test(empid number)").collect()
-        session.sql(unpack_sql).collect()
+        #session.sql(unpack_sql).collect()
     return unpack_sql
 
 #if __name__ == "__main__":
