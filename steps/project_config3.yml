@@ -39,6 +39,7 @@ CANONICAL:
         - Employer: [value,STRING,EMPLOYER_NAME  ]
     MDM_CUSTOMER_EDUCATION:
         - MDMID: [value,NUMBER,PARTY_ID]
+        - Education: [NA,string,Education]
         - SchoolName: [value,STRING,SCHOOL_NAME]
         - SchoolType: [value,STRING,SCHOOL_TYPE]
         - SchoolCode: [value,STRING,SCHOOL_CODE]
