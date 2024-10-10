@@ -123,7 +123,7 @@ def get_sql(session,interface_name: str):
         #exit(0)
     #select section of unpack sql
         column_unpack_1=[list(my_dec.keys())[0] + ".value:" + (list(my_dec.values())[0])[0]\
-                + "::" + (list(my_dec.values())[0])[1] + " as {}".format(list(my_dec.keys())[0]) for my_dec in column_list if list(my_dec.values())[0])[0] != 'NA' ]
+                + "::" + (list(my_dec.values())[0])[1] + " as {}".format(list(my_dec.keys())[0]) for my_dec in column_list if (list(my_dec.values())[0])[0] != 'NA' ]
         column_unpack_1 = ",".join(column_unpack_1)
     #lateral flatten section of unpack sql
         flatten_unpack_2 = [build_flatten_class(session,my_dec) for my_dec in column_list]
