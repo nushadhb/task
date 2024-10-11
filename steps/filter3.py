@@ -37,15 +37,25 @@ Geo_list=['GeoAccuracy','Latitude','Longitude','HCOAddressScore','PreferredPhysi
          'Zip', ]
 zip_list=['Zip4','Zip5']
 Education_list=['SchoolName','Type','Degree','YearsInProgram','GraduationYear','StartYear','EndYear','FieldofStudy','ConfirmationFlag','SchoolCode','State','EducationEndDate']
-#Team_assignment_address_list=['AddressID','AddressLine1','AddressLine2','City','StateProvince','Zip4','Zip5']
-#Team_assignment_list=['TeamAssignment','AMDMID']
 
-Team_assignment_list=['TeamAssignment','AMDMID','AddressID','AddressLine1','AddressLine2','City','StateProvince','Zip4','Zip5']
+##MD_Customer_salesteam sub-level
+Team_assignment_address=['AddressID','AddressLine1','AddressLine2','City','StateProvince','Zip4','Zip5'] # Address
+Team_assinment_saleteam=['SalesTeam','Address','CalledOnStatus','Email','AMDMID'] #TeamAssignment
+Team_assignment_eamil=['Email']
+Team_assignment_phone=['Phone']
+team_assignment_nested_levels ={'Address':"['AddressID','AddressLine1','AddressLine2','City','StateProvince','Zip4','Zip5']"\
+                             ,'TeamAssignment':"['SalesTeam','Address','CalledOnStatus','Email','AMDMID']"
+                             ,'Email':"['Phone']"}
 
 v_json_prev_field=[]  # Global variable 
 v_table_name='' # global variable
 def cust_address(session,config_file,interface_name):
     pass
+
+def get_nested_obect(json_field: str) ->str:
+    for key,value in team_assignment_nested_levels:
+        if json_field val:
+            return "LATERAL FLATTEN(input => {}.value:value ,path => {}, outer => true) {}".format(key,json_field)
 
 def build_flatten_class(session,Objects) -> str:
     str1='--'
@@ -81,13 +91,7 @@ def build_flatten_class(session,Objects) -> str:
         #    str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
         elif v_table_name == 'MDM_CUSTOMER_SALESTEAM' and  v_json_field.strip() in Team_assignment_list:
             print(str1)
-            if v_json_field.strip() == "TeamAssignment":
-                str1 = "LATERAL FLATTEN(input => {}.value:value ,path => {}, outer => true) {}".format(v_json_field,'Address','Address')
-            elif v_json_field.strip() == "AMDMID":
-                 str1 = "LATERAL FLATTEN(input => TeamAssignment.value:value ,path => {}, outer => true) {}".format(v_json_field,v_json_field)
-            else:
-                 str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
-
+                 str1 = get_nested_obect(v_json_alias)  
         else:
             str1 ="LATERAL FLATTEN(input => src:attributes:" + v_json_field + ", outer => true) {}".format(v_json_field)
     return str1
