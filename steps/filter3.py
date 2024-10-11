@@ -134,6 +134,8 @@ def get_sql(session,interface_name: str):
         column_unpack_1 = "\n,".join(column_unpack_1)
     #lateral flatten section of unpack sql
         flatten_unpack_2 = [build_flatten_class(session,my_dec) for my_dec in column_list if list(my_dec.keys())[0] not in v_json_prev_field ]
+        print(flatten_unpack_2)
+        exit(0)
         flatten_unpack_2="\n,".join(flatten_unpack_2)
         flatten_unpack_2.replace(',--','')         
     #fitler section of unpack sql
