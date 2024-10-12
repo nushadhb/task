@@ -67,42 +67,25 @@ def build_flatten_class(session,Objects) -> str:
     v_json_value=list(Objects.values())[0][0]
     v_json_dataType=list(Objects.values())[0][1]
     v_json_alias =list(Objects.values())[0][2]
+    v_json_path =list(Objects.values())[0][3]
 
     global v_json_prev_field
 
     if v_json_field.strip() not in v_json_prev_field:
         v_json_prev_field.append(v_json_field.strip())
 
-        if v_json_field.strip() in Address_list:
-            str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
-            print(str1)
-         # exit(0)
-        elif v_json_field.strip() in Dea_list:
-            print(str1)
-            str1 = "LATERAL FLATTEN(input => DEA.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
-        #elif v_json_field.strip() in Geo_list:
-        #    print(str1)
-       #     str1 = "LATERAL FLATTEN(input => GeoLocation.value:value ,path => '{}', outer => true) {}".format(v_json_field,v_json_field)
-        elif v_table_name == 'MDM_ADDRESS_MASTER' and v_json_field.strip() in zip_list:
-            print(str1)
-            str1 = "LATERAL FLATTEN(input => Zip.value:value ,path => '{}', outer => true) {}".format(v_json_field,v_json_field)
-        elif v_json_field.strip() in Education_list:
-            print(str1)
-            str1 = "LATERAL FLATTEN(input => Education.value:value ,path => '{}', outer => true) {}".format(v_json_field,v_json_field)
-        #elif v_json_field.strip() in Team_assignment_address_list:
-        #    print(str1)
-        #    str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
-        elif v_table_name == 'MDM_CUSTOMER_SALESTEAM':
+         if v_table_name == 'MDM_CUSTOMER_SALESTEAM':
              print(str1)
-             str1 = get_nested_obect(v_json_field)  
-        else:
-            str1 ="LATERAL FLATTEN(input => src:attributes:" + v_json_field + ", outer => true) {}".format(v_json_field)
+             if v_json_path != 'NA':
+                str1= "LATERAL FLATTEN(input => {}.value:value ,path => {}, outer => true) {}".format(v_json_field,v_json_path,v_json_field)
+             else: 
+                str1= "LATERAL FLATTEN(input => src:attributes:" + v_json_field + ", outer => true) {}".format(v_json_field)
     return str1
 def build_filter_class(session,Objects):
     v_json_field=list(Objects.keys())[0]
     v_json_value=list(Objects.values())[0][0]
     v_json_dataType=list(Objects.values())[0][1]
-    v_json_alias =list(Objects.values())[0][2]
+    v_json_alias =list(Objects.values())[0][3]
 
     return "NVL({}.value:ov::string,'true')='true'".format(v_json_field)
 
