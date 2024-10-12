@@ -136,7 +136,7 @@ def get_sql(session,interface_name: str):
         flatten_unpack_2 = [build_flatten_class(session,my_dec) for my_dec in column_list if list(my_dec.keys())[0] not in v_json_prev_field ]
         #flatten_unpack_2="\n,".join(flatten_unpack_2)
         #flatten_unpack_2.replace(',--','')         
-        flatten_unpack_2 = \n.''.join(''.join(l) for l in flatten_unpack_2)
+        flatten_unpack_2 = '\n.'.join(''.join(l) for l in flatten_unpack_2)
     #fitler section of unpack sql
         filter_unpack_3=''
         if interface_name == 'MDM_CUSTOMER_MASTER':
