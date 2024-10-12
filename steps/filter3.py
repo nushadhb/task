@@ -94,7 +94,7 @@ def build_flatten_class(session,Objects) -> str:
         #    str1 = "LATERAL FLATTEN(input => Address.value:value ,path => '{}', outer => true) {}".format(v_json_field, v_json_field)
         elif v_table_name == 'MDM_CUSTOMER_SALESTEAM':
              print(str1)
-             str1 = get_nested_obect(v_json_alias)  
+             str1 = get_nested_obect(v_json_field)  
         else:
             str1 ="LATERAL FLATTEN(input => src:attributes:" + v_json_field + ", outer => true) {}".format(v_json_field)
     return str1
