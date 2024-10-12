@@ -54,7 +54,7 @@ def cust_address(session,config_file,interface_name):
 
 def get_nested_obect(v_json_field: str) ->str:
     for key,val in team_assignment_nested_levels.items():
-        if json_field in val:
+        if v_json_field in val:
             return "LATERAL FLATTEN(input => {}.value:value ,path => {}, outer => true) {}".format(key,v_json_field,v_json_field)
         else: 
             return "LATERAL FLATTEN(input => src:attributes:" + v_json_field + ", outer => true) {}".format(v_json_field)
