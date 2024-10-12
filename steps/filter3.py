@@ -74,12 +74,12 @@ def build_flatten_class(session,Objects) -> str:
     if v_json_field.strip() not in v_json_prev_field:
         v_json_prev_field.append(v_json_field.strip())
 
-         if v_table_name == 'MDM_CUSTOMER_SALESTEAM':
-             print(str1)
-             if v_json_path != 'NA':
-                str1= "LATERAL FLATTEN(input => {}.value:value ,path => {}, outer => true) {}".format(v_json_field,v_json_path,v_json_field)
-             else: 
-                str1= "LATERAL FLATTEN(input => src:attributes:" + v_json_field + ", outer => true) {}".format(v_json_field)
+        if v_table_name == 'MDM_CUSTOMER_SALESTEAM':
+            print(str1)
+            if v_json_path == 'NA':
+               str1= "LATERAL FLATTEN(input => {}.value:value ,path => {}, outer => true) {}".format(v_json_field,v_json_path,v_json_field)
+            else: 
+               str1= "LATERAL FLATTEN(input => src:attributes:" + v_json_field + ", outer => true) {}".format(v_json_field)
     return str1
 def build_filter_class(session,Objects):
     v_json_field=list(Objects.keys())[0]
