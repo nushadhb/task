@@ -74,7 +74,7 @@ def build_flatten_class(session,Objects) -> str:
     if v_json_field.strip() not in v_json_prev_field:
         v_json_prev_field.append(v_json_field.strip())
 
-        if v_table_name == 'MDM_CUSTOMER_SALESTEAM':
+        #if v_table_name != 'NA': #'MDM_CUSTOMER_SALESTEAM':
             print(str1)
             if v_json_path.strip() != 'NA':
                str1= "LATERAL FLATTEN(input => {}.value:value ,path => '{}', outer => true) {}".format(v_json_path,v_json_field.replace('_1',''),v_json_field)
