@@ -18,7 +18,7 @@ v_json_prev_field_list=[]  # Global variable
 v_table_name='' # global variable
 
 v_audit_columns_list = ['BATCH_RUN_ID','REC_INSERT_TMSP','REC_CREATED_BY']
-v_audit_columns_values_list = ['(select batch_id from load_master where open_status=''Open'' and process_name=''HCP'') as BATCH_RUN_ID','CURRENT_TIMESTAMP() AS REC_INSERT_TMPS','CURRENT_USER() AS REC_CREATED_BY']
+v_audit_columns_values_list = ["(select batch_id from load_master where open_status='Open' and process_name='HCP') as BATCH_RUN_ID",'CURRENT_TIMESTAMP() AS REC_INSERT_TMPS','CURRENT_USER() AS REC_CREATED_BY']
 
 def cust_address(session,config_file,interface_name):
     pass
@@ -103,7 +103,7 @@ def get_sql(session,interface_name: str):
         unpack_sql = "{} SELECT \n {} \n {} ,\n {}  \n {}".format(v_to_save_columns_str,column_unpack_1, from_clause, flatten_unpack_2,filter_unpack_3)
      #create stg tables 
         #session.sql("create or replace table abac_test(empid number)").collect()
-        #session.sql(unpack_sql).collect()
+        session.sql(unpack_sql).collect()
     return unpack_sql
 
 #if __name__ == "__main__":
