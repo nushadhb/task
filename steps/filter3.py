@@ -17,6 +17,9 @@ import json
 v_json_prev_field_list=[]  # Global variable 
 v_table_name='' # global variable
 
+v_audit_columns_list = ['BATCH_RUN_ID','REC_INSERT_TMSP','REC_CREATED_BY']
+v_audit_columns_values_list = ['(select batch_id from load_master where open_status=''Open'' and process_name=''HCP'') as BATCH_RUN_ID','CURRENT_TIMESTAMP() AS REC_INSERT_TMPS','CURRENT_USER() AS REC_CREATED_BY']
+
 def cust_address(session,config_file,interface_name):
     pass
 
@@ -68,7 +71,7 @@ def get_sql(session,interface_name: str):
        
         #prepare column parameters ()
         
-        v_to_save_columns_list = [list(my_dic.values())[0][2] for my_dic in column_list  if (list(my_dic.values())[0])[0] != 'NA']
+        v_to_save_columns_list = [list(my_dic.values())[0][2] for my_dic in column_list  if (list(my_dic.values())[0])[0] != 'NA'] + v_audit_columns_list
         v_to_save_columns_str = ','.join(v_to_save_columns_list)
         v_to_save_columns_str ="INSERT INTO STG_{}({})".format(interface_name,v_to_save_columns_str)
 
@@ -76,7 +79,7 @@ def get_sql(session,interface_name: str):
         column_list= config_read["CANONICAL"][interface_name]
     #select section of unpack sql
         column_unpack_1=[list(my_dec.keys())[0] + ".value:" + (list(my_dec.values())[0])[0]\
-                + "::" + (list(my_dec.values())[0])[1] + " as {}".format(list(my_dec.values())[0][2]) for my_dec in column_list if (list(my_dec.values())[0])[0] != 'NA' ]
+                + "::" + (list(my_dec.values())[0])[1] + " as {}".format(list(my_dec.values())[0][2]) for my_dec in column_list if (list(my_dec.values())[0])[0] != 'NA' ] + v_audit_columns_values_list
         column_unpack_1 = "\n,".join(column_unpack_1)
     #lateral flatten section of unpack sql
         flatten_unpack_2 = [build_flatten_class(session,my_dec) for my_dec in column_list if list(my_dec.keys())[0] not in v_json_prev_field_list ]
