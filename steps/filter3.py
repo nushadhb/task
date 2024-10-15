@@ -68,7 +68,7 @@ def get_sql(session,interface_name: str):
        
         #prepare column parameters ()
         
-        v_to_save_columns_list = [list(my_dic.values())[0][2] for my_dic in column_list]
+        v_to_save_columns_list = [list(my_dic.values())[0][2] for my_dic in column_list  if (list(my_dic.values())[0])[0] != 'NA']
         v_to_save_columns_str = ','.join(v_to_save_columns_list)
         v_to_save_columns_str ="INSERT INTO STG_{}({})".format(interface_name,v_to_save_columns_str)
 
@@ -97,7 +97,7 @@ def get_sql(session,interface_name: str):
     #build full unpack sql
         #unpack_sql = "CREATE OR REPLACE TABLE STG_{} AS SELECT \n {} \n {} ,\n {}  \n  {} \n {}".format(interface_name,column_unpack_1, from_clause, flatten_unpack_2,where_clause,filter_unpack_3)
         #unpack_sql = "CREATE OR REPLACE TABLE STG_{} AS SELECT \n {} \n {} ,\n {}  \n {}".format(interface_name,column_unpack_1, from_clause, flatten_unpack_2,filter_unpack_3)
-        unpack_sql = "{} AS SELECT \n {} \n {} ,\n {}  \n {}".format(v_to_save_columns_str,column_unpack_1, from_clause, flatten_unpack_2,filter_unpack_3)
+        unpack_sql = "{} SELECT \n {} \n {} ,\n {}  \n {}".format(v_to_save_columns_str,column_unpack_1, from_clause, flatten_unpack_2,filter_unpack_3)
      #create stg tables 
         #session.sql("create or replace table abac_test(empid number)").collect()
         #session.sql(unpack_sql).collect()
