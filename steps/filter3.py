@@ -69,40 +69,50 @@ def get_sql(session,interface_name: str):
         schema_name = config_read["CANONICAL"]["SCHEMA_NAME"]
         where_clause = " WHERE type='configuration/entityTypes/HCP'"
         
-        v_fault_columns_list = list(column_list['Default']) # get the default columns list from to add it later .
-        del column_list['Default']  # remove the defualt columns list from the dynamic build 
-        #prepare column parameters ()
+    #prepare default column list 
+
+        v_default_columns_select_list = [my_dic for my_dic in column_list if list(my_dic.keys())[0] == 'Default']
+        v_default_columns_select_list=(default_list[0])['Default']
+        v_default_columns_select_list = [ "'{}' as {}".format(x[0],x[1]) for x in default_list ]
+        v_default_columns_select_list = ','.join(default_list)
         
-        v_to_save_columns_list = [list(my_dic.values())[0][2] for my_dic in column_list  if (list(my_dic.values())[0])[0] != 'NA'] + v_audit_columns_list
+    #default columns for insert sql (col1,col2...)
+        v_dafault_to_save_columns_list = [x[1] for x in default_list ]
+        
+    #prepare insert sql columns parameters using the both main select columns list + default columns + audit columms (col1,col2....)
+        
+        v_to_save_columns_list = [list(my_dic.values())[0][2] for my_dic in column_list  \
+                if (list(my_dic.values())[0])[0] != 'NA' and list(my_dic.keys())[0] != 'Default'] +  v_dafault_to_save_columns_list + v_audit_columns_list
+
         v_to_save_columns_str = ','.join(v_to_save_columns_list)
         v_to_save_columns_str ="INSERT INTO STG_{}({})".format(interface_name,v_to_save_columns_str)
 
     #confg_yaml =config_yaml_data
-        column_list= config_read["CANONICAL"][interface_name]
-    #select section of unpack sql
-        column_unpack_1=[list(my_dec.keys())[0] + ".value:" + (list(my_dec.values())[0])[0]\
-                + "::" + (list(my_dec.values())[0])[1] + " as {}".format(list(my_dec.values())[0][2]) for my_dec in column_list if (list(my_dec.values())[0])[0] != 'NA' ] + v_audit_columns_values_list
-        column_unpack_1 = "\n,".join(column_unpack_1)
+        #column_list= config_read["CANONICAL"][interface_name]
+    #select section of unpack sql, all columns in select unpack sql
+        v_select_colummns_unpack_1_str=[list(my_dic.keys())[0] + ".value:" + (list(my_dic.values())[0])[0]\
+                + "::" + (list(my_dic.values())[0])[1] + " as {}".format(list(my_dic.values())[0][2]) for my_dic in column_list if (list(my_dic.values())[0])[0] != 'NA' and list(my_dic.keys())[0] != 'Default' ] + v_default_columns_select_list + v_audit_columns_values_list
+        v_select_colummns_unpack_1_str = "\n,".join(v_select_colummns_unpack_1_str)
     #lateral flatten section of unpack sql
-        flatten_unpack_2 = [build_flatten_class(session,my_dec) for my_dec in column_list if list(my_dec.keys())[0] not in v_json_prev_field_list ]
+        v_flatten_unpack_2_str = [build_flatten_class(session,my_dec) for my_dic in column_list if list(my_dic.keys())[0] not in v_json_prev_field_list and ( (list(my_dic.values())[0])[0] != 'NA' and list(my_dic.keys())[0] != 'Default') ]
         #remove NONE values : 
-        flatten_unpack_2=[i for i in flatten_unpack_2 if i is not None]
-        flatten_unpack_2="\n,".join(flatten_unpack_2)
-        flatten_unpack_2.replace(',--','')         
+        v_flatten_unpack_2_str=[i for i in v_flatten_unpack_2_str if i is not None]
+        v_flatten_unpack_2_str="\n,".join(v_flatten_unpack_2_str)
+        v_flatten_unpack_2_str.replace(',--','')         
     #fitler section of unpack sql
-        filter_unpack_3=''
+        v_filter_unpack_3_str=''
         if interface_name == 'MDM_CUSTOMER_MASTER':  # currently filter is used only for customer_master fo other tables add into this list 
-            filter_unpack_3 = [build_filter_class(session,my_dec) for my_dec in column_list]
-            filter_unpack_3 = "\n AND ".join(filter_unpack_3)
-            filter_unpack_3 = "WHERE " + filter_unpack_3
+            v_filter_unpack_3_str = [build_filter_class(session,my_dec) for my_dec in column_list]
+            v_filter_unpack_3_str = "\n AND ".join(v_filter_unpack_3_str)
+            v_filter_unpack_3_str = "WHERE " + v_filter_unpack_3_str
     #build from class of unpack sql
-        #from_clause = "FROM {}.{}.{}_VW_STREAMS P".format(database_name,schema_name,interface_name)
-        from_clause = "FROM {}.{}.{}_VW_STREAMS P".format('db_naushad','schema_naushad','car_sales1')
+        #v_from_clause_str = "FROM {}.{}.{}_VW_STREAMS P".format(database_name,schema_name,interface_name)
+        v_from_clause_str = "FROM {}.{}.{}_VW_STREAMS P".format('db_naushad','schema_naushad','car_sales1')
 
     #build full unpack sql
-        #unpack_sql = "CREATE OR REPLACE TABLE STG_{} AS SELECT \n {} \n {} ,\n {}  \n  {} \n {}".format(interface_name,column_unpack_1, from_clause, flatten_unpack_2,where_clause,filter_unpack_3)
-        #unpack_sql = "CREATE OR REPLACE TABLE STG_{} AS SELECT \n {} \n {} ,\n {}  \n {}".format(interface_name,column_unpack_1, from_clause, flatten_unpack_2,filter_unpack_3)
-        unpack_sql = "{} SELECT \n {} \n {} ,\n {}  \n {}".format(v_to_save_columns_str,column_unpack_1, from_clause, flatten_unpack_2,filter_unpack_3)
+        #unpack_sql = "CREATE OR REPLACE TABLE STG_{} AS SELECT \n {} \n {} ,\n {}  \n  {} \n {}".format(interface_name,v_select_colummns_unpack_1_str, v_from_clause_str, v_flatten_unpack_2_str,where_clause,v_filter_unpack_3_str)
+        #unpack_sql = "CREATE OR REPLACE TABLE STG_{} AS SELECT \n {} \n {} ,\n {}  \n {}".format(interface_name,v_select_colummns_unpack_1_str, v_from_clause_str, v_flatten_unpack_2_str,v_filter_unpack_3_str)
+        unpack_sql = "{} \n SELECT \n {} \n {} ,\n {}  \n {}".format(v_to_save_columns_str,v_select_colummns_unpack_1_str, v_from_clause_str, v_flatten_unpack_2_str,v_filter_unpack_3_str)
      #create stg tables 
         #session.sql("create or replace table abac_test(empid number)").collect()
         session.sql(unpack_sql).collect()
