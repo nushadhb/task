@@ -68,9 +68,7 @@ def get_sql(session,interface_name: str):
         database_name = config_read["CANONICAL"]["DATABASE_NAME"]
         schema_name = config_read["CANONICAL"]["SCHEMA_NAME"]
         where_clause = " WHERE type='configuration/entityTypes/HCP'"
-        
-        v_fault_columns_list = list(column_list['Default']) # get the default columns list from to add it later .
-        del column_list['Default']  # remove the defualt columns list from the dynamic build 
+       
         #prepare column parameters ()
         
         v_to_save_columns_list = [list(my_dic.values())[0][2] for my_dic in column_list  if (list(my_dic.values())[0])[0] != 'NA'] + v_audit_columns_list
