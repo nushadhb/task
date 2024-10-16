@@ -102,7 +102,7 @@ def get_sql(session,interface_name: str):
     #fitler section of unpack sql
         v_filter_unpack_3_str=''
         if interface_name == 'MDM_CUSTOMER_MASTER':  # currently filter is used only for customer_master fo other tables add into this list 
-            v_filter_unpack_3_str = [build_filter_class(session,my_dic) for my_dic in column_list]
+            v_filter_unpack_3_str = [build_filter_class(session,my_dic) for my_dic in column_list if (list(my_dic.values())[0])[0] != 'NA' and list(my_dic.keys())[0] != 'Default']
             v_filter_unpack_3_str = "\n AND ".join(v_filter_unpack_3_str)
             v_filter_unpack_3_str = "WHERE " + v_filter_unpack_3_str
     #build from class of unpack sql
