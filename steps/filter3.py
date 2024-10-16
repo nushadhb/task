@@ -72,12 +72,12 @@ def get_sql(session,interface_name: str):
     #prepare default column list 
 
         v_default_columns_select_list = [my_dic for my_dic in column_list if list(my_dic.keys())[0] == 'Default']
-        v_default_columns_select_list=(v_default_columns_select_list[0])['Default']
-        v_default_columns_select_list = [ "'{}' as {}".format(x[0],x[1]) for x in v_default_columns_select_list ]
+        v_default_columns_select_list_1=(v_default_columns_select_list[0])['Default']
+        v_default_columns_select_list = [ "'{}' as {}".format(x[0],x[1]) for x in v_default_columns_select_list_1 ]
         v_default_columns_select_list = ','.join(v_default_columns_select_list)
         
     #default columns for insert sql (col1,col2...)
-        v_dafault_to_save_columns_list = [x[1] for x in v_default_columns_select_list ]
+        v_dafault_to_save_columns_list = [x[1] for x in v_default_columns_select_list_1 ]
         
     #prepare insert sql columns parameters using the both main select columns list + default columns + audit columms (col1,col2....)
         
