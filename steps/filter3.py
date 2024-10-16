@@ -72,7 +72,7 @@ def get_sql(session,interface_name: str):
     #prepare default column list 
 
         v_default_columns_select_list = [my_dic for my_dic in column_list if list(my_dic.keys())[0] == 'Default']
-        v_default_columns_select_list=(default_list[0])['Default']
+        v_default_columns_select_list=(v_default_columns_select_list[0])['Default']
         v_default_columns_select_list = [ "'{}' as {}".format(x[0],x[1]) for x in default_list ]
         v_default_columns_select_list = ','.join(default_list)
         
