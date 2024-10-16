@@ -73,11 +73,11 @@ def get_sql(session,interface_name: str):
 
         v_default_columns_select_list = [my_dic for my_dic in column_list if list(my_dic.keys())[0] == 'Default']
         v_default_columns_select_list_1=(v_default_columns_select_list[0])['Default']
-        v_default_columns_select_list_2 = [ "'{}' as {}".format(x[0],x[1]) for x in v_default_columns_select_list_1 ]
+        v_default_columns_select_list_2 = [ "'{}' as {}".format(x[0],x[1]) for x in v_default_columns_select_list_1]
        # v_default_columns_select_list_3 = ','.join(v_default_columns_select_list)
         
     #default columns for insert sql (col1,col2...)
-        v_dafault_to_save_columns_list_4 = [x[1] for x in v_default_columns_select_list_1 ]
+        v_dafault_to_save_columns_list_4 = [x[1] for x in v_default_columns_select_list_1]
         
     #prepare insert sql columns parameters using the both main select columns list + default columns + audit columms (col1,col2....)
         
@@ -94,7 +94,7 @@ def get_sql(session,interface_name: str):
                 + "::" + (list(my_dic.values())[0])[1] + " as {}".format(list(my_dic.values())[0][2]) for my_dic in column_list if (list(my_dic.values())[0])[0] != 'NA' and list(my_dic.keys())[0] != 'Default' ] + v_default_columns_select_list_2 + v_audit_columns_values_list
         v_select_colummns_unpack_1_str = "\n,".join(v_select_colummns_unpack_1_str)
     #lateral flatten section of unpack sql
-        v_flatten_unpack_2_str = [build_flatten_class(session,my_dic) for my_dic in column_list if list(my_dic.keys())[0] not in v_json_prev_field_list and ( (list(my_dic.values())[0])[0] != 'NA' or list(my_dic.keys())[0] != 'Default') ]
+        v_flatten_unpack_2_str = [build_flatten_class(session,my_dic) for my_dic in column_list if list(my_dic.keys())[0] not in v_json_prev_field_list and list(my_dic.keys())[0] != 'Default'] 
         #remove NONE values : 
         v_flatten_unpack_2_str=[i for i in v_flatten_unpack_2_str if i is not None]
         v_flatten_unpack_2_str="\n,".join(v_flatten_unpack_2_str)
