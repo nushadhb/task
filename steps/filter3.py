@@ -115,7 +115,7 @@ def get_sql(session,interface_name: str):
         unpack_sql = "{} \n SELECT \n {} \n {} ,\n {}  \n {}".format(v_to_save_columns_str,v_select_colummns_unpack_1_str, v_from_clause_str, v_flatten_unpack_2_str,v_filter_unpack_3_str)
      #create stg tables 
         #session.sql("create or replace table abac_test(empid number)").collect()
-        session.sql(unpack_sql).collect()
+        #session.sql(unpack_sql).collect()
     return unpack_sql
 
 #if __name__ == "__main__":
