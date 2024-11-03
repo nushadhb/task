@@ -1,0 +1,60 @@
+Vsc setup 
+
+#install python 3.11.4 
+# install 
+#nowflake-connector-python==3.12.2
+#snowflake-snowpark-python==1.17.0
+#choose  got to vsc  the interpretr ,select view ( on top vailable option) -> commandPallert --> next search typing python
+#--> next select the desired python interpreter path :C:\Program Files\Python\Python311\python.exe
+
+# to connect to snowflake there should be deafault connection available in .toml file 
+
+# setup the connection: 
+
+
+# The Snowpark package is required for Python Worksheets. 
+# You can add more packages by selecting them using the Packages control and then importing them.
+
+import snowflake.snowpark as snowpark
+from snowflake.snowpark import Session
+from snowflake.snowpark.functions import col
+from snowflake.snowpark.functions import udf
+from snowflake.snowpark.functions import sproc
+from snowflake.snowpark.types import IntegerType
+
+
+
+
+
+def main(session): 
+    # Your code goes here, inside the "main" handler.
+    tableName = 'information_schema.packages'
+    dataframe = session.table(tableName).filter(col("language") == 'python')
+    #session.add_packages('snowflake-snowpark-python')
+    # Print a sample of the dataframe to standard output.
+    dataframe.show()
+
+    # #case1: local session register of stored procedure using the decorator : 
+    # @proc
+    # def minus_one2(session: snowpark.Session) -> int:
+    #    return 1
+    
+   # case2 : permanent regrist of stored procedure 
+    
+    # def minus_one2(session: snowpark.Session) -> int:
+    #     return 1
+    # _= session.sproc.register(session=Session,func=minus_one2,name="minus_one5",return_type=IntegerType(),
+    #                        is_permanent=True,stage_location="@~/",replace=True)
+    
+    #permanent regist of function 
+    # @udf(name="minus_one1",is_permanent=True,stage_location="@~/",replace=True)
+    # def minus_one1(x: int) -> int:
+    #     return x - 1
+    df = session.sql("SELECT minus_one1(20)")
+    
+    # df.show()
+    # session.udf.register(  lambda x, y: x * y + 1, return_type=IntegerType(), input_types=[IntegerType(), IntegerType()],
+    #     is_permanent=True, name="mul", replace=True, stage_location="@~/")
+    # df= session.sql("select mul(5, 6) as mul").collect()
+    return df
+
