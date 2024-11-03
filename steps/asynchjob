@@ -1,0 +1,88 @@
+from snowflake.snowpark.functions import col
+from snowflake.snowpark.files import SnowflakeFile
+
+import snowflake.snowpark as snowpark
+from snowflake.snowpark import Session
+from snowflake.snowpark.functions import col
+#import pandas as pd
+import snowflake.snowpark.functions as F
+import yaml
+import sys
+import json
+from time import time
+from snowflake.snowpark.functions import udf
+from snowflake.snowpark.functions import sproc
+
+
+from snowflake.snowpark.functions import when_matched, when_not_matched
+from snowflake.snowpark.types import IntegerType, StringType, StructField, StructType
+
+# @proc
+# def multiply_by_2(num):
+#     res= num * 4
+#     return num
+def run_parallel(session):
+    dfs = [session.sql("call get_batch_id('HCP')") for _ in range(20)]
+    start =time()
+    async_jobs = [df.collect_nowait() for df in dfs]
+    res = [async_job.result() for async_job in async_jobs]
+    time1 = time()-start 
+    print(time1)
+    start=time()
+    res = [df.collect() for df in dfs]
+    time2=time()-start 
+    print(time2)
+    print(async_jobs.is_done())
+def asynch_run(session):
+    # df = session.create_dataframe([[float(4), 3, 5], [2.0, -4, 7], [3.0, 5, 6],[4.0,6,8]], schema=["a", "b", "c"])
+    # async_job = df.collect(block=False)
+    # async_job.result()
+    dfs = [session.sql("select SYSTEM$WAIT(1)") for _ in range(10)]
+    start = time()
+    res = [df.collect() for df in dfs]
+    time1 = time() - start
+    start = time()
+    async_jobs = [df.collect_nowait() for df in dfs]
+    res = [async_job.result() for async_job in async_jobs]
+    print(res)
+    time2 = time() - start
+    print(time1)
+    print(time2)
+    print(time2 < time1)
+
+connection_parameters = {
+   #"account": "abbv_us_com.us-east-1.aws",
+   #"account": "QIA43524.us-east-1.aws",
+   "account": "abbv_us_com.us-east-1",
+   "user": "BAIGNX2",
+   "role":"ABBV_SMDW_D_ENGG_BTS_PS_DIL_511",
+   "database":"ABBV_SMDW_DEV",
+   "schema":"MDMV",
+   "warehouse":"ABBV_SMDW_D_ENGG_BTS_PS_INTG_511",
+   "authenticator":"externalbrowser"
+}
+session = Session.builder.configs(connection_parameters).create()
+_=session.use_database('ABBV_SMDW_DEV')
+_=session.use_role('ABBV_SMDW_D_ENGG_BTS_PS_INTG_511')
+_=session.use_schema('MDM')
+_=session.use_warehouse('ABBV_SMDW_DEV_BTS_INT_READ_WH01')
+def main(session):
+    # df=session.table('STG_MDM_CUSTOMER_MASTER').count()
+    # print(df)
+    sql_affected = session.sql("call stg_indentifier_load('=HCP')").collect()
+    print(sql_affected)
+   # @sproc
+    # def multiply_by_2(session,num) -> int:
+    #     res= num * 4
+    # return res
+
+    #run_parallel(session)
+    #res = session.sql("call multiply_by_2(4)")
+   # print(res)
+    print('session is working ')
+    #print(asynch_run(session))
+
+   
+if __name__ == "__main__":
+    with Session.builder.getOrCreate() as session:
+        main(session)
