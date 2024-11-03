@@ -1,0 +1,117 @@
+execute IMMEDIATE $$
+declare 
+warhoue_name string :='ABBV_SMDW_DEV_BTS_INT_READ_WH01';
+task_tracking_table string :='mdm_task_run_tracking';
+database_name string :='ABBV_SMDW_DEV';
+schema_name string :='MDM';
+begin 
+  use database identifier(:database_name);
+  use schema identifier(:schema_name);
+		--Root task
+		CREATE or replace TASK unpack_mdm_hcp_root_t
+		WAREHOUSE = :warhoue_name
+		SCHEDULE = '30 minute'
+		WHEN
+		SYSTEM$STREAM_HAS_DATA('MDM.ENTITIES_HCP_VW_STREAM')
+		AS
+		declare 
+		batch_id string;
+		begin 
+		--open the batch for hcp 
+		call open_batch('HCP');
+		--get the oepn batch id current
+		call mdm.get_batch_id('HCP') into :batch_id;
+
+		--task started 
+		insert into mdm.mdm_task_run_tracking(batch_id,PROCESS_NAME,STG_TB_NAME,TASK_NAME,CREATED_BY,CREATED_DATE,description) 
+		values(:batch_id,'HCP','ENTITIES_HCP_VW_STREAM_t','unapck_mdm_hcp_root_t',current_user(),current_timestamp(),'Task started.');
+		--create table on stream for unpacking ;
+		create or replace transient table MDM.ENTITIES_HCP_VW_STREAM_t as select * from MDM.ENTITIES_HCP_VW_STREAM where METADATA$ACTION='INSERT'; -- TAKE ONLY inserted records, becuase we are not maintaining the history onver update 
+
+		insert into mdm.mdm_task_run_tracking(batch_id,PROCESS_NAME,STG_TB_NAME,TASK_NAME,CREATED_BY,CREATED_DATE,description) 
+		values(:batch_id,'HCP','ENTITIES_HCP_VW_STREAM_t','unapck_mdm_hcp_root_t',current_user(),current_timestamp(),'table MDM.ENTITIES_HCP_VW_STREAM created using the stream  ENTITIES_HCP_VW_STREAM_t');
+
+		--set the dependent tables 
+		call set_dependency('HCP');
+
+		--logging 
+		insert into mdm.mdm_task_run_tracking(batch_id,PROCESS_NAME,STG_TB_NAME,TASK_NAME,CREATED_BY,CREATED_DATE,description) 
+		values(:batch_id,'HCP','ENTITIES_HCP_VW_STREAM_t','unapck_mdm_hcp_root_t',current_user(),current_timestamp(),'set_dependency()=dependent tables created successfully');
+
+		--track the process 
+		insert into mdm.mdm_task_run_tracking(batch_id,PROCESS_NAME,STG_TB_NAME,TASK_NAME,CREATED_BY,CREATED_DATE,description) 
+		values(:batch_id,'HCP','ENTITIES_HCP_VW_STREAM_t','unapck_mdm_hcp_root_t',current_user(),current_timestamp(),'task completed');
+
+		call system$set_return_value(:batch_id);
+		END;
+
+		--
+
+		CREATE or replace TASK unpack_hcp_full_t1
+		WAREHOUSE = :warhoue_name
+		--SCHEDULE = '1 minute'
+		after  unpack_mdm_hcp_root_t
+		AS 
+		begin 
+		let batch_id string := (system$get_predecessor_return_value());
+		--task started 
+		insert into mdm.mdm_task_run_tracking(batch_id,PROCESS_NAME,BUSINES_NAME,STG_TB_NAME,TASK_NAME,CREATED_BY,CREATED_DATE,description) 
+		values(:batch_id,'HCP','ENTITIES_HCP_VW','unpack_hcp_full_t1','unpack_hcp_full_t1',current_user(),current_timestamp(),'Task started');
+
+
+		call  unpack_full_json_mdm('HCP');
+		insert into mdm.mdm_task_run_tracking(batch_id,PROCESS_NAME,BUSINES_NAME,STG_TB_NAME,TASK_NAME,CREATED_BY,CREATED_DATE,description) 
+		values(:batch_id,'HCP','ENTITIES_HCP_VW','unpack_hcp_full_t1','unpack_hcp_full_t1',current_user(),current_timestamp(),'task completed');
+		call system$set_return_value(:batch_id);
+		end;
+
+		create or replace task ENRICHMENT_HCP_FULL_T1
+		warehouse=:warhoue_name
+		after unpack_hcp_full_t1
+		as begin 
+		let batch_id string := (system$get_predecessor_return_value());
+		call  SP_MDM_ENRICHMENT('MDMHCP');
+		insert into mdm.mdm_task_run_tracking(batch_id,PROCESS_NAME,BUSINES_NAME,STG_TB_NAME,TASK_NAME,CREATED_BY,CREATED_DATE,description) 
+		values(:batch_id,'HCP','ENTITIES_HCP_VW','HCP_MDM_STG','enrichment_hcp_full_t1',current_user(),current_timestamp(),'task completed');
+		call system$set_return_value(:batch_id);
+		end;
+
+		create or replace task DQM_EXECUTION_HCP_FULL_T1
+			warehouse=:warhoue_name
+			after ENRICHMENT_HCP_FULL_T1
+			as begin 
+		let batch_id string := (system$get_predecessor_return_value());
+		call  SP_DQM_VALIDATION('HCP');
+		insert into mdm.mdm_task_run_tracking(batch_id,PROCESS_NAME,BUSINES_NAME,STG_TB_NAME,TASK_NAME,CREATED_BY,CREATED_DATE,description) 
+		values(:batch_id,'HCP','ENTITIES_HCP_VW','HCP_MDM_STG','DQM_EXECUTION_hcp_full_t1',current_user(),current_timestamp(),'task completed');
+		call system$set_return_value(:batch_id);
+		end; 
+
+
+		create or replace task CANONICAL_LOAD_HCP_FULL_T1
+		warehouse=:warhoue_name
+		after DQM_EXECUTION_HCP_FULL_T1
+		as begin 
+		let batch_id string := (system$get_predecessor_return_value());
+		call  SP_STG_CONONICAL_TABLE_LOAD('HCP');
+		insert into mdm_task_run_tracking(batch_id,PROCESS_NAME,BUSINES_NAME,STG_TB_NAME,TASK_NAME,CREATED_BY,CREATED_DATE,description) 
+		values(:batch_id,'HCP','ENTITIES_HCP_VW','HCP_MDM_STG','CANONICAL_LOAD_HCP_FULL_T1',current_user(),current_timestamp(),'task completed');
+		call system$set_return_value(:batch_id);
+		end;
+	 
+		create or replace task mdm.unpack_mdm_hcp_root_finalize_t
+		warehouse = :warhoue_name
+		finalize = unpack_mdm_hcp_root_t
+		as 
+		declare 
+		email_list varchar;
+		begin 
+		let batch_id string := (system$get_predecessor_return_value());
+		insert into mdm.mdm_task_run_tracking(batch_id,PROCESS_NAME,BUSINES_NAME,STG_TB_NAME,TASK_NAME,CREATED_BY,CREATED_DATE,description) 
+		values(:batch_id,'HCP','ENTITIES_HCP_VW',' ','unpack_mdm_hcp_root_finalize_t',current_user(),current_timestamp(),'DAG completed succesfully');
+		--update mdm.load_master set open_status='Closed';
+		call mdm.close_batch_mdm('HCP');
+		end;
+
+	END;
+$$;
