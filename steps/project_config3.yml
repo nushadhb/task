@@ -1,8 +1,13 @@
 version: 0.2
-CANONICAL:
+CANONICAL-MDM:
     DATABASE_NAME: ABBV_SMDW_DEV
-    SCHEMA_NAME: DIL
-    ROLE_NAME: 'ROLE'
+    SCHEMA_NAME: MDM
+    ROLE_NAME: 'ABBV_SMDW_D_ENGG_BTS_PS_INTG_511'
+    warehouse: 
+        XSMALL: 'ABBV_SMDW_DEV_BTS_INT_READ_WH01'
+        SMALL: 'ABBV_SMDW_DEV_BTS_INT_READ_WH01'
+        MEDIUM: 'ABBV_SMDW_DEV_BTS_INT_READ_WH01'
+      
     MDM_CUSTOMER_MASTER:
         - MDMID: [value,NUMBER,PARTY_ID,NA]
         - Name: [value,STRING,PARTY_NAME,NA]
@@ -46,9 +51,9 @@ CANONICAL:
         - ABSCode: [value,STRING,ABS,NA]
         - ABSCode: [value,STRING,MAJOR_PROF_ACTIVITY,NA]
         - Employer: [value,STRING,EMPLOYER_NAME,NA]
-        - Default : [[HCP, PARTY_SUPER_TYPE_CODE],[Personal, PARTY_SUPER_TYPE_DESCRIPTION]]
-    MDM_ADDRESS_MASTER:
-        - MDMID: [value,number,MDM_ID,NA]
+        - Default : [["'HCP'", PARTY_SUPER_TYPE_CODE],["'Personal'", PARTY_SUPER_TYPE_DESCRIPTION]]
+    MDM_CUSTOMER_ADDRESS_MASTER:
+        - MDMID: [value,number,PARTY_ID,NA]
         - Address: [NA,varchar,Address_label,NA]
         - attributeURIs: [value,string,ADDRESS_ID,Address]
         - Addressline1: [value,varchar,Address_line1,Address]
@@ -59,27 +64,27 @@ CANONICAL:
         - AddressStatus: [value,varchar,Address_Status_description,Address]
         - AddressType: [value,varchar,Address_Type_code,Address]
         - AddressType: [value,varchar,Address_Type_description,Address]
-        - City: [value,varchar,City,Address]
+        - City: [value,varchar,City_name,Address]
         - Country: [value,varchar,Country_code,Address]
         - DEA: [NA,varchar,DEA,Address]
         - DEAExpirationDate: [NA,varchar,DEAExpirationDate,DEA]
-        - DEAStatus: [value,varchar,DEAStatus,DEA]
-        - GeoLocation: [label,varchar,GeoLocation_lebel,Address]
+        - DEAStatus: [NA,varchar,DEAStatus,DEA]  # Check this column if we needed 
+        - GeoLocation: [NA,varchar,GeoLocation,Address] # Check this column if we needed 
         - GeoAccuracy: [value,varchar,GeoAccuracy,GeoLocation]
         - Latitude: [value,varchar,Latitude,GeoLocation]
         - Longitude: [value,varchar,Longitude,GeoLocation]
-        - HCOAddressScore: [value,varchar,HCOAddressScore,GeoLocation]
-        - PreferredPhysicalAddressFlag: [value,varchar,PREFERED_MAILING_INDICATOR,GeoLocation]
+        #- HCOAddressScore: [value,varchar,HCOAddressScore,GeoLocation] # Check this column if we needed 
+        #- PreferredPhysicalAddressFlag: [value,varchar,PREFERED_MAILING_INDICATOR,GeoLocation]
         - Premise: [value,varchar,Premise,GeoLocation]
         - StateProvince: [value,varchar,State_Province_CODE,GeoLocation]
         - Street: [value,varchar,Street,GeoLocation]
         - SubAdministrativeArea: [value,varchar,Sub_Administrative_Area,GeoLocation]
-        - VerificationStatus: [value,varchar,Verification_Status,GeoLocation]
+        #- VerificationStatus: [value,varchar,Verification_Status,GeoLocation]
         - VerificationStatusDetails: [value,varchar,ABBVIE_VERIFICATION_CODE,GeoLocation]
-        - VerificationStatusDetails: [value,varchar,ABBVIE_VERIFICATION_DESCRIPTION,GeoLocation]
-        - Zip: [value,varchar,Zip_lebel,GeoLocation]
-        - Zip4: [value,number,Zip4,Zip]
-        - Zip5: [value,number,Zip5,Zip]
+        #- VerificationStatusDetails: [value,varchar,ABBVIE_VERIFICATION_DESCRIPTION,GeoLocation]
+        - Zip: [NA,varchar,Zip_lebel,GeoLocation] # Check this column if we needed 
+        - Zip4: [value,number,POSTAL_EXTENSION_CODE,Zip]
+        - Zip5: [value,number,POSTAL_CODE,Zip]
         - CountryName: [value,string,COUNTRY_NAME,Address]
         - MaximumAddressScore: [value,string,MAX_ADDRESS_SCORE,Address]
         - VendorMatchFlag: [value,string,VENDOR_MATCH_FLAG,Address]
@@ -90,20 +95,20 @@ CANONICAL:
         - FIPSCity: [value,string,FIPS_CITY,Address]
         - Region: [value,string,ADDRESS_REGION,Address]
         - Division: [value,string,ADDRESS_DIVISION,Address]
-        - Group_1: [value,string,ADDRESS_GROUP,Address]
+        - Group_1: [value,string,ADDRESS_GROUP,Address]  # gruop is key word in snowflake database so this is appeneded with with _1 ( it will replaced with '' in final select sql )
         - Tract: [value,string,ADDRESS_TRACT,Address]
         - Suffix: [value,string,ADDRESS_SUFFIX,Address]
         - BlockGroup: [value,string,ADDRESS_BLOCK_GROUP,Address]
         - EnumerationGroup: [value,string,ADDRESS_ENUMERATION_GROUP,Address]
         - County: [value,string,COUNTY_NAME,Address]
         - AddressFlag: [value,string,ADDRESS_IGNORED_FLAG,Address]
-        - VerificationStatus: [value,string,ADDRESS_CERTIFICATN_STAT_DESC,Address]
+        #- VerificationStatus: [value,string,ABBVIE_VERIFICATION_CODE,Address]
         - AVC: [value,string,AVC_CODE,Address]
         - CarrierRoute: [value,string,CARRIER_ROUTE,Address]
         - DeliveryPointCode: [value,string,DELIVERY_POINT_CODE,Address]
         - AddressChangeDate: [value,string,ADDRESS_CHANGE_DATE,Address]
-        - Default : [[HCP, PARTY_SUPER_TYPE_CODE],[uri, HCO_RELTIO_URI]]
-    MDM_CUSTOMER_EDUCATION:
+        - Default : [["'HCP'", PARTY_SUPER_TYPE_CODE],['"uri"', HCO_RELTIO_URI]]
+    MDM_CUSTOMER_EDUCATION:  # filter the records uri present in the mdm_coustomer maste while insterting data to base table 
         - MDMID: [value,NUMBER,PARTY_ID,NA]
         - Education: [NA,string,Education,NA]
         - SchoolName: [value,STRING,SCHOOL_NAME,Education]
@@ -115,10 +120,15 @@ CANONICAL:
         - EndYear: [value,STRING,END_YEAR,Education]
         - FieldofStudy: [value,STRING,FIELD_OF_STUDY,Education]
         - ConfirmationFlag: [value,STRING,CONFIRMATION_FLAG,Education]
-        - State: [value,STRING,GRADUATION_STATE_CODE,Education]
+        - State: [value,STRING,STATE_CODE,Education]
         - EducationEndDate: [value,STRING,EDUCATION_END_DATE,Education]
-        - EducationEndDate: [value,STRING,END_DATE,Education]
-    MDM_CUSTOMER_SALESTEAM:
+        - EndDate: [value,STRING,END_DATE,Education]
+        - SpecialtyTraining1: [value,STRING,SPECIALTY_TRAINING1,Education]
+        - SpecialtyTraining2: [value,STRING,SPECIALTY_TRAINING2,Education]
+        - CumulativeYearsOfTraining: [value,STRING,CUMULATIVE_YEARS_OF_TRAINING,Education]
+        - SecondaryFieldofStudy: [value,STRING,SECONDARY_FIELD_OF_STUDY,Education]
+        - Default : [["'HCP'", PARTY_SUPER_TYPE_CODE],['"uri"' , uri]]
+    MDM_CUSTOMER_SALES_TEAM:
         - MDMID: [value,STRING,PARTY_ID,NA]
         - TeamAssignment: [NA,STRING,AMDM_PHYSICIAN_ID,NA]
         - AMDMID: [value,STRING,AMDM_PHYSICIAN_ID,TeamAssignment]
@@ -138,22 +148,91 @@ CANONICAL:
         - CalledOnStatus: [value,STRING,CALLED_ON_STATUS,TeamAssignment]
         - SalesTeam: [value,STRING,SALES_TEAM_CD,TeamAssignment ]
         - WebsiteAddress: [value,STRING,WEBSITE,NA]
-        - Default : [[HCP, PARTY_SUPER_TYPE_CODE]]
-    MDM_MULTI_SPECIALITY:
+        - Default : [["'HCP'", PARTY_SUPER_TYPE_CODE]]
+    MDM_CUSTOMER_MULTI_SPECIALTY: # depenency on cross walk
         - MDMID: [value,NUMBER,PARTY_ID,NA]
-        - Specialities: [NA,STRING,SPECIALTY_CODE,NA]
+        - MDMID: [ov,BOOLEAN,PARTY_ID_OV,NA]
+        - Specialities: [NA,STRING,NA,NA]
         - Specialty: [value,STRING,SPECIALTY_CODE,Specialities]
         - SpecialtyType: [value,STRING,SPECIALTY_TYPE,Specialities]
         - SpecialtyDescription: [value,STRING,SPECIALTY_DESCRIPTION,Specialities]
         - ABSCalculationDate: [value,STRING,ABS_CALCULATION_DATE,NA]
-        - ABSCode: [value,STRING,ABS_CODE,NA]
-    MDM_IDENTIFIER:
+        - ABSCode: [lookupCode,STRING,ABS_CODE,NA]
+        - ABSCode: [value,STRING,ABS_DESCRIPTION,NA]
+        - Specialty: [uri,STRING,SPECIALTY_URI,Specialities]
+        - Default : [["'HCP'", PARTY_SUPER_TYPE_CODE]]
+    MDM_CUSTOMER_PRE_IDENTIFIER: # depenency on cross walk
         - MDMID: [value,NUMBER,PARTY_ID,NA]
-        - Type: [value,STRING,IDENTIFIER_TYPE_DESCRIPTION,NA]
-        - ID: [value,STRING,IDENTIFIER_VALUE_TEXT,NA]
-        - uri: [uri,STRING,IDENTIFIER_URI,NA]
+        - MDMID: [ov,BOOLEAN,PARTY_ID_OV,NA] # we can filter this true later while taking the data to main/stg table 
+        - Identifiers: [uri,string,attributes_uri,NA]
+        - Type: [value,string,IDENTIFIER_TYPE_CODE,Identifiers]
+        - Type: [value,string,IDENTIFIER_TYPE_DESCRIPTION,Identifiers]
+        - ID: [value,string,IDENTIFIER_VALUE_TEXT,Identifiers]
+        - Status: [value,string,IDENTIFIER_STATUS_CODE,Identifiers]
+        - Status: [value,string,IDENTIFIER_STATUS_DESCRIPTION,Identifiers]
+        - CreateDate: [value,timestamp,IDENTIFIER_EFFECTIVE_DATE,Identifiers]
+        - DeactivationDate: [value,timestamp,NPI_DEACTIVATE_DATE,Identifiers]
+        - DeactivationReasonCode: [value,timestamp,NPI_DEACTIVATE_REASON_CODE,Identifiers]
+        - ReactivationDate: [value,timestamp,NPI_REACTIVATE_DATE,Identifiers]
+        - Default : [["'HCP'",PARTY_SUPER_TYPE_CODE],['"uri"',URI,]]
+    MDM_CUSTOMER_IDENTIFIER_PROFILE:
+        - MDMID: [value,NUMBER,PARTY_ID,NA]
+        - MDMID: [ov,BOOLEAN,PARTY_ID_OV,NA]  # we can filter this true later while taking the data to main/stg table 
+        - ProfileID: [value,string,Profile_ID,NA]
+        - ProfileID: [uri,string,attributes_uri,NA]
+        - Default: [['"uri"' , URI]]
+    MDM_CUSTOMER_LICENSE:
+        - MDMID: [value,number,PARTY_ID,NA]
+        - MDMID: [ov,BOOLEAN,PARTY_ID_OV,NA]  # we can filter this true later while taking the data to main/stg table 
+        - License: [value,string,License_uri,NA]
+        - Number: [value,string,LICENSE_NUMBER,License]
+        - LicenseType: [value,string,LICENSE_TYPE_CODE,License]
+        - State: [value,string,STATE_PROVINCE_CODE,License]
+        - BoardCode: [value,string,STATE_BOARD_NUMBER,License]
+        - Status: [value,string,LICENSE_STATUS,License]
+        - ExpirationDate: [value,string,LICENSE_EXPIRATION_DATE,License]
+        - VendorVerificationDate: [value,string,IDENTIFIER_EFFECTIVE_DATE,License]
+        - SampleEligibility: [value,string,SAMPLING_ELIGIBILITY_FLAG,License]
+        - AdjudicationCode: [value,string,SLN_ADJUDICATION_CODE,License]
+        - Default: [['"uri"' , URI]]
+    MDM_CUSTOMER_DEA:
+        - MDMID: [value,string,PARTY_ID,NA]
+        - MDMID: [ov,BOOLEAN,PARTY_ID_OV,NA]  # we can filter this true later while taking the data to main/stg table 
+        - BusinessActivity: [NA,string,DEA_ACTIVITY_CODE,NA]
+        - Code: [value,string,DEA_ACTIVITY_CODE,BusinessActivity]
+        - Code: [value,string,DEA_ACTIVITY_DESCTIPTION,BusinessActivity]
+        - SubCode: [lookupCode,string,DEA_SUB_ACTIVITY_CODE,BusinessActivity]
+        - SubCode: [value,string,DEA_SUB_ACTIVITY_DESCRIPTION,BusinessActivity]
+        - ScheduledDrug: [value,string,DEA_SCHEDULE_CLASS,NA]
+        - Default: [['"uri"' , URI]]
+    MDM_CUSTOMER_CROSS_WALK:
+        - crosswalks: [Type,string,data_source_uri,crosswalks]
+        - attributes: [value,string,attributes_uri,crosswalks]
+        - Default: [['"uri"' , URI]]
+    MDM_CUSTOMER_IDENTIFIER:
+        - URI: [NA,NA,URI,NA]
+        - PARTY_ID: [NA,NA,PARTY_ID,NA]
+        - LICENSE_URI: [NA,NA,LICENSE_URI,NA]
+        - LICENSE_NUMBER: [NA,NA,LICENSE_NUMBER,NA]
+        - LICENSE_TYPE_CODE: [NA,NA,LICENSE_TYPE_CODE,NA]
+        - STATE_PROVINCE_CODE: [NA,NA,STATE_PROVINCE_CODE,NA]
+        - STATE_BOARD_NUMBER: [NA,NA,STATE_BOARD_NUMBER,NA]
+        - LICENSE_STATUS: [NA,NA,LICENSE_STATUS,NA]
+        - LICENSE_EXPIRATION_DATE: [NA,NA,LICENSE_EXPIRATION_DATE,NA]
+        - IDENTIFIER_EFFECTIVE_DATE: [NA,NA,IDENTIFIER_EFFECTIVE_DATE,NA]
+        - SAMPLING_ELIGIBILITY_FLAG: [NA,NA,SAMPLING_ELIGIBILITY_FLAG,NA]
+        - SLN_ADJUDICATION_CODE: [NA,NA,SLN_ADJUDICATION_CODE,NA]
+    # MDM_CUSTOMER_ADDRESS_XREF:
+    #     - MDMID: [value,number,PARTY_ID,NA]
+    #     - Address: [NA,varchar,NA,NA]
+    #     - attributeURIs: [value,string,ADDRESS_ID,Address]
+    #     - refRelation: [value:refRelation,string,refRelation,address]
+    #     - crosswalks: ["refRelation.value",string,IDENTIFIER_TYPE_DESCRIPTION,refRelation]
+    #     - attributeURIs: ["value",string,attributes_uri,crosswalks]
+    #     #- crosswalks: ["value",string,IDENTIFIER_TYPE_CODE,NA]
+    #     - Default : [["'HCP'", PARTY_SUPER_TYPE_CODE],['"uri"', uri]]
     MDM_CUSTOMER_CERTIFICATE:
-        - MDMID: [value,string,MDMID,NA]
+        - MDMID: [value,string,PARTY_ID,NA]
         - Certificates: [NA,string,NA,NA]
         - CertificateId: [value,string,CERTIFICATE_ID,Certificates]
         - Name: [value,string,OTHER_NAME,Certificates]
@@ -165,14 +244,19 @@ CANONICAL:
         - InternalSamplingStatus: [value,string,INTERNAL_SAMPLING_STATUS,Certificates]
         - PVSEligibilty: [value,string,OTHER_PVSELIGIBILTY,Certificates]
         - IssueDate: [value,string,CERTIFICATE_ISSUE_DATE,Certificates]
-    MDM_CUSTOMER_TAXONOMY:
-        - MDMID: [value,string,MDMID,NA]
+        - Default : [["'HCP'", PARTY_SUPER_TYPE_CODE]]  # "'HCP'" if this default for field lese '"uri"' for vriant column pick from json 
+    MDM_CUSTOMER_TAXONOMY:  # depenency on cross walk
+        - MDMID: [value,string,PARTY_ID,NA]
+        - MDMID: [ov,BOOLEAN,PARTY_ID_OV,NA] # we can filter this true later while taking the data to main/stg table 
         - Taxonomy: [NA,string,NA,NA]
         - Type: [value,string,TAXONOMY_TYPE,Taxonomy]
-        - Group: [value,string,TAXONOMY_GROUP,Taxonomy]
+        - Taxonomy: ['value[''Taxonomy'']',string,TAXONOMY_CODE,Taxonomy]
+        #- Group: [value,string,TAXONOMY_GROUP,Taxonomy]
         - ProviderType: [value,string,TAXONOMY_PROVIDER_TYPE,Taxonomy]
         - Classification: [value,string,TAXONOMY_CLASSIFICATION,Taxonomy]
         - Specialization: [value,string,TAXONOMY_SPECIALIZATION,Taxonomy]
-        - StateCode: [value,string,STATE_CODE,Taxonomy]
+        - StateCode: [value,string,TAXONOMY_STATE_CODE,Taxonomy]
+        - Taxonomy: [uri,string,TAXONOMY_URI,Taxonomy]
         - Priority: [value,string,TAXONOMY_PRIORITY,Taxonomy]
-        - TaxonomyStateCode: [value,string,TAXONOMY_STATE_CODE,Taxonomy]
+        - TaxonomyStateCode: [NA,string,TAXONOMY_STATE_CODE,Taxonomy]
+        - Default : [["'HCP'", PARTY_SUPER_TYPE_CODE]]
