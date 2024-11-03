@@ -1,0 +1,61 @@
+import sys
+#sys.path.append(r'C:/Program Files/Python/Python311/Lib/site-packages/snowflake')
+#sys.path
+import snowflake.snowpark as snowpark
+from snowflake.snowpark import Session
+import yaml
+# from snowflake.snowpark.functions import col
+# from snowflake.snowpark.functions import udf
+# from snowflake.snowpark.functions import sproc
+# from snowflake.snowpark.types import IntegerType
+
+#https://abbv_us_com.us-east-1.snowflakecomputing.com/
+connection_parameters = {
+   #"account": "abbv_us_com.us-east-1.aws",
+   #"account": "QIA43524.us-east-1.aws",
+   "account": "abbv_us_com.us-east-1",
+   "user": "BAIGNX2",
+   "role":"ABBV_SMDW_D_ENGG_BTS_PS_DIL_511",
+   "database":"ABBV_SMDW_DEV",
+   "schema":"MDMV",
+   "warehouse":"ABBV_SMDW_D_ENGG_BTS_PS_INTG_511",
+   "authenticator":"externalbrowser"
+}
+session = Session.builder.configs(connection_parameters).create()
+session.use_role('ABBV_SMDW_D_ENGG_BTS_PS_DIL_511')
+# _=session.use_database('ABBV_SMDW_DEV')
+# _=session.use_schema('MDMV')
+def multiply_by_two(val1):
+    val1= val1 * 2
+    return val1
+def close_batach(session,source: str) -> None:
+    sql_affected = session.sql("update MDM.load_master set OPEN_STATUS='Closed' where PROCESS_NAME='{}'".format(source))
+
+def set_context():
+    _=session.use_role('ABBV_SMDW_D_ENGG_BTS_PS_DIL_511')
+
+def put_file_stage():
+    # _= session.file.put(r"C:\Abbvie\other\other\filter3.py", "@~/config/", auto_compress=False,overwrite=True)
+    #_ = session.file.put(r"C:\Abbvie\other\other\project_config3.yml", "@~/config/", auto_compress=False,overwrite=True)
+    _ = session.file.put(r"C:\Abbvie\other\other\filter3.py", "@ABBV_SMDW_DEV.MDMV.MY_INT_STAGE1/config/", auto_compress=False,overwrite=True)
+    _ = session.file.put(r"C:\Abbvie\other\other\project_config3.yml", "@ABBV_SMDW_DEV.MDMV.MY_INT_STAGE1/config/", auto_compress=False,overwrite=True)
+   # _ = session.file.put(r"C:\Abbvie\Alignment-extract\VEND_EXTRACTS.csv", "@ABBV_SMDW_DEV.MDMV.MY_INT_STAGE1/vendor_extract/", auto_compress=False,overwrite=True)
+    print(session.get_session_stage())  # local stage created by snowpark session : 
+    put_result = session.sql('ls @~/config/')
+    put_result.show()
+
+def read_file():
+    fd = session.file.get_stream("@MDMV.MY_INT_STAGE1/config/project_config3.yml", decompress=False)
+    res =  fd.read() 
+    #print(res)
+    config_read=yaml.safe_load(res)
+    print(config_read["CANONICAL"]['MDM_CUSTOMER_MASTER'])
+    fd.close()
+def main(session):
+   res= multiply_by_two(4)
+   print(res)
+   put_file_stage()
+   #read_file()
+if __name__ == "__main__":
+    with Session.builder.getOrCreate() as session:
+        main(session)
