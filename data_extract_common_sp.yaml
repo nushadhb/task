@@ -1,0 +1,25 @@
+version: 0.2
+CANONICAL-ALIGN:
+
+  DATABASE_NAME: ABBV_SMDW_DEV
+
+  SCHEMA_NAME: ALIGN
+
+  ROLE_NAME: 'ABBV_SMDW_D_ENGG_BTS_PS_INTG_511'
+
+  warehouse:
+
+    XSMALL: 'ABBV_SMDW_DEV_BTS_INT_READ_WH01'
+
+    SMALL: 'ABBV_SMDW_DEV_BTS_INT_READ_WH01'
+
+    MEDIUM: 'ABBV_SMDW_DEV_BTS_INT_READ_WH01'
+
+  #stage_name: '@ABBV_SMDW_DEV.MDM.MDM_CANONICAL_LOCAL_STG/align/vendor_extract/data/'
+
+  stage_name: '@ALIGN.ABBV_SMDW_ALIGN_INT_STAGE/align/vendor_extract/data/'
+
+  #stage_name: '@ALIGN.ABBV_SMDW_ALIGN/OUTBOUND/'
+
+  config_table: ALIGN_EXTRACT_MASTER
+
